@@ -26,23 +26,26 @@ def load_document(filepath):
         raise ValueError(f"Unsupported file type: {ext}")
     
 def save_codes_to_csv(dictionary, filepath):
-     with open(f'{filepath}.csv', 'w') as csv_file:  
+     """Saves code dictionary to csv"""
+     with open(filepath, 'w') as csv_file:  
         writer = csv.writer(csv_file)
         for key, value in dictionary.items():
             writer.writerow([key, value])
 
 def save_codes_to_pickle(dictionary, filepath):
-    with open(f'{filepath}', 'wb') as f:
+    """Saves code dictionary to pickle format"""
+    with open(filepath, 'wb') as f:
         pickle.dump(dictionary, f)
 
 
 def save_codes_to_json(dictionary, filepath):
-    json.dump(dictionary, open(f"{filepath}", 'w' ) )
+    """Saves code dictionary to json"""
+    with open(filepath, 'w') as f:
+        json.dump(dictionary, f)
 
 def load_codes_from_json(filepath):
-    dictionary = json.load( open( f"{filepath}" ) )
-
-    
+    with open(filepath, 'r') as f:
+        return json.load(f)
 
 def load_codes_from_csv(filepath):
     _, ext = os.path.splitext(filepath)

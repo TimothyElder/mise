@@ -1,8 +1,8 @@
 import json
 import csv
 import os
-from data_manager import Code
-from utils.file_io import save_codes_to_json, save_codes_to_csv, save_codes_to_pickle
+from mise.data_manager import Code
+from mise.utils.file_io import save_codes_to_json, save_codes_to_csv, save_codes_to_pickle
 
 class CodeManager:
     def __init__(self, codes=None):
@@ -21,18 +21,17 @@ class CodeManager:
             raise KeyError(f"Code '{name}' does not exist.")
         del self.codes[name]
 
-    def update_code(self, name, new_code, new_description):
+    def update_code(self, name, new_description):
         if name not in self.codes:
             raise KeyError(f"Code '{name}' does not exist.")
         
-        self.codes[name] = new_code
-        self.update(name=new_description)
+        self.codes[name] = new_description
 
-    def get_all_codes(self):
-        self.keys()
+    def get_all_codes(self, keys = False, values = False):
+        return self.codes
 
     def save_codes(self, filepath): 
-        """File code dictionary to specified filepath and type
+        """Save code dictionary to specified filepath and type
         Provides several options"""
         _, ext = os.path.splitext(filepath)
         
@@ -47,13 +46,6 @@ class CodeManager:
 
         else:
             raise ValueError(f"Unsupported file type: {ext}. Must be 'csv', 'pkl', or 'json'")
-        
-
-        if ext == "csv":
-            with open(f'{filepath}.csv', 'w') as csv_file:  
-                writer = csv.writer(csv_file)
-                for key, value in self.items():
-                    writer.writerow([key, value])
 
     def load_codes(filepath):
         _, ext = os.path.splitext(filepath)
