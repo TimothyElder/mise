@@ -17,6 +17,7 @@ setup(
         "python-docx>=0.8.11",
         "markdown",
         "json",
+        "pandas"
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

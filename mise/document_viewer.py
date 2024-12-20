@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QMainWindow, QTextBrowser, QVBoxLayout, QWidget
-from utils.file_io import load_document
+from mise.utils.file_io import load_document
 
 class DocumentViewer(QMainWindow):
     def __init__(self, filepath):
@@ -22,4 +22,5 @@ class DocumentViewer(QMainWindow):
             self.text_browser.setHtml(markdown(content))  # Render Markdown as HTML
         else:
             self.text_browser.setPlainText(content)  # Show plain text for DOCX
+        
         layout.addWidget(self.text_browser)
