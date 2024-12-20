@@ -1,17 +1,17 @@
-from PySide6.QtWidgets import QApplication, QMainWindow, QMenuBar, QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout
-from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QFileDialog, QInputDialog, QMessageBox
 from PySide6.QtGui import QPixmap
+from PySide6.QtCore import Qt
+
+import os
+
 from mise.project_manager import create_project_directory
 from mise.project_window import ProjectWindow
-
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QFileDialog, QInputDialog, QMessageBox
-from PySide6.QtCore import Qt
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Mise - Open Source Qualitative Data Analysis")
+        self.setWindowTitle("Open Source Qualitative Data Analysis")
         self.resize(800, 600)
 
         # Create the menu bar
@@ -42,7 +42,8 @@ class WelcomeWidget(QWidget):
         open_button = QPushButton("Open Project")
         button_layout.addWidget(create_button)
         button_layout.addWidget(open_button)
-        button_layout.addStretch()  # Push buttons to the top
+        open_button.clicked.connect(self.open_project)
+        button_layout.setAlignment(Qt.AlignCenter)
         layout.addLayout(button_layout)
 
         # Right side: logo and description
@@ -56,8 +57,19 @@ class WelcomeWidget(QWidget):
         # Add the logo to the layout
         layout.addWidget(logo_label)
         logo_label.setAlignment(Qt.AlignCenter)
-        description_label = QLabel("Mise is a qualitative data analysis tool designed to make coding easier.")
-        description_label.setAlignment(Qt.AlignCenter)
+        description_label = QLabel()
+        description_label.setText(
+            """<p style="font-size: 14px; color: grey;">Mise ("<em>meez</em>") is an qualitative data analysis tool designed to place good principles at the heart of software.</p>
+               <p>There are a few principles that guide this software:</p>
+               <ul>
+                    <li>Codes should be applied to large chunks of text</li>
+                    <li>Everything should be accessible to the analyst</li>
+                    <li>Anlaysis should be made as transparent as possible</li>
+               </ul>
+
+                <p>Suggestions or bugs can be reported to <a href="mailto:timothy.b.elder@dartmouth.edu">Timothy.B.Elder@dartmouth.edu</a></p>
+            """)
+        description_label.setAlignment(Qt.AlignLeft)
         description_label.setWordWrap(True)
 
         logo_layout.addWidget(logo_label)
@@ -85,8 +97,15 @@ class WelcomeWidget(QWidget):
         except Exception as e:
             QMessageBox.critical(self, "Error", str(e))
 
-if __name__ == "__main__":
-    app = QApplication([])
-    window = MainWindow()
-    window.show()
-    app.exec()
+    def open_project(self):
+        dirpath = QFileDialog.getExistingDirectory(self, "Select Directory for Project")
+
+
+        print(type(dirpath))
+        print(type(os.path.basename(dirpath)))
+        if not dirpath:
+            return
+        
+        # THis is broken as the ProjectWindow Class was designed only with new projects in mind:
+        # TypeError: ProjectWindow.__init__() missing 1 required positional argument: 'project_path'
+        self.parent().setCentralWidget(ProjectWindow(os.path.basename(dirpath), dirpath))
