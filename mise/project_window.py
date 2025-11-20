@@ -1,51 +1,64 @@
-# Need redo the back button so that it just goes back one directory up the tree maybe some CLI thing for `cd ..`
-
-
-from PySide6.QtWidgets import QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QListWidget, QTextBrowser, QLabel, QListWidgetItem, QPushButton
+from PySide6.QtWidgets import QMainWindow, QSplitter, QVBoxLayout, QWidget, QListWidget, QTextBrowser, QLabel, QPushButton, QListWidgetItem, QFileDialog, QMessageBox
 from PySide6.QtGui import QIcon
+from pathlib import Path
 import os
+
+from mise.code_manager import CodeManager
+from mise.utils.file_io import convert_to_canonical_text
+
+
+
+# Allowed file types to upload
+ALLOWED_EXTENSIONS = {".pdf", ".docx", ".doc", ".md", ".markdown"}
 
 
 class ProjectWindow(QMainWindow):
-    def __init__(self, project_name, project_path):
+    def __init__(self, project_name, project_root):
         super().__init__()
         self.setWindowTitle(f"Mise - {project_name}")
         self.resize(1200, 800)
+
+        # Store paths
         self.project_name = project_name
-        self.project_path = project_path
+        self.project_root = Path(project_root)
+        self.current_path = self.project_root
+        self.texts_dir = self.project_root / "texts"
 
         # Main widget
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
+        splitter = QSplitter()
+        self.setCentralWidget(splitter)
 
-        # Layouts
-        main_layout = QHBoxLayout(central_widget)
+        # Left: File list with back button
+        left_widget = QWidget()
+        left_layout = QVBoxLayout(left_widget)
 
-        # Left: File list container with back button
-        left_layout = QVBoxLayout()
-
-        # Back Button
         self.back_button = QPushButton("Back")
         self.back_button.clicked.connect(self.go_back)
+        self.back_button.setEnabled(False)  # Initially disabled at root directory
         left_layout.addWidget(self.back_button)
 
-        # File List
         self.file_list = QListWidget()
-        self.populate_file_list(project_path)  # Populate the file list
+        # Use current_path (or project_root) instead of undefined project_root
+        self.populate_file_list(self.current_path)
         left_layout.addWidget(self.file_list)
 
-        main_layout.addLayout(left_layout)
+        splitter.addWidget(left_widget)
 
-        # Center: Document Viewer
+        self.upload_button = QPushButton("Upload")
+        self.upload_button.clicked.connect(self.handle_upload_clicked)
+        left_layout.addWidget(self.upload_button)
+
+        # Center: Document viewer
         self.document_viewer = QTextBrowser()
-        self.document_viewer.setText("Select a document to view its content.")  # Placeholder
-        main_layout.addWidget(self.document_viewer)
+        self.document_viewer.setText("Select a document to view its content.")
+        splitter.addWidget(self.document_viewer)
 
-        # Right: Code Manager
-        self.code_manager = QLabel("Code Manager Placeholder")  # Replace with a real widget later
-        main_layout.addWidget(self.code_manager)
+        # Right: Code manager
+        self.code_manager = QLabel("Code Manager Placeholder")
+        splitter.addWidget(self.code_manager)
 
-        # Connect item click
+        splitter.setSizes([200, 600, 400])
+
         self.file_list.itemClicked.connect(self.handle_item_click)
 
     def populate_file_list(self, directory):
@@ -54,11 +67,8 @@ class ProjectWindow(QMainWindow):
         """
         self.file_list.clear()  # Clear the current list
 
-        # Enable or disable the back button
-        if directory == self.project_path:
-            self.back_button.setDisabled(True)
-        else:
-            self.back_button.setDisabled(False)
+        # Enable or disable the back button based on directory
+        self.back_button.setEnabled(os.path.abspath(directory) != self.project_root)
 
         # Set icons
         folder_icon = QIcon(os.path.join(os.path.dirname(__file__), "assets", "folder.png"))
@@ -83,11 +93,11 @@ class ProjectWindow(QMainWindow):
         Handle clicks on items in the file list.
         """
         item_name = item.text()
-        full_path = os.path.join(self.project_path, item_name)
+        full_path = os.path.join(self.texts_dir, item_name)
 
         if os.path.isdir(full_path):
             # If it's a directory, populate the list with its contents
-            self.project_path = full_path  # Update project path to the subdirectory
+            self.project_root = full_path  # Update project path to the subdirectory
             self.populate_file_list(full_path)
         else:
             # If it's a file, display its content in the document viewer
@@ -106,9 +116,72 @@ class ProjectWindow(QMainWindow):
 
     def go_back(self):
         """
-        Navigate back to the parent directory.
+        Navigate back to the parent directory, emulating 'cd ..' behavior.
         """
-        parent_path = os.path.dirname(self.project_path)  # Get the parent directory
-        if parent_path:  # Ensure it's valid
-            self.project_path = parent_path
+        parent_path = os.path.dirname(self.project_root)  # Get the parent directory
+
+        # Ensure we don't navigate above the root project directory
+        if os.path.abspath(parent_path) != os.path.abspath(self.project_root):
+            self.project_root = parent_path
             self.populate_file_list(parent_path)
+
+    def handle_upload_clicked(self):
+        # 1) Open dialog for multiple files
+        dialog_filter = (
+            "Documents (*.pdf *.docx *.doc *.md *.markdown);;"
+            "All Files (*)"
+        )
+        file_paths, _ = QFileDialog.getOpenFileNames(
+            self,
+            "Select documents to import",
+            "",                # start dir; you can use last-used dir later
+            dialog_filter,
+        )
+        if not file_paths:
+            return  # user cancelled
+
+        # 2) Process each file
+        imported_any = False
+        errors = []
+
+        for src in file_paths:
+            src_path = Path(src)
+            ext = src_path.suffix.lower()
+
+            if ext not in ALLOWED_EXTENSIONS:
+                errors.append(f"{src_path.name}: unsupported extension '{ext}'")
+                continue
+
+            try:
+                text = convert_to_canonical_text(src_path)    # we'll define this below
+                dest_path = self._allocate_text_path(src_path)
+                dest_path.write_text(text, encoding="utf-8")
+
+                # TODO: insert a row in documents table here later
+
+                imported_any = True
+            except Exception as e:
+                errors.append(f"{src_path.name}: {e}")
+
+        # 3) Feedback + refresh view
+        if imported_any:
+            # however you show files – maybe list contents of self.texts_dir
+            self.populate_file_list(self.texts_dir)
+
+        if errors:
+            QMessageBox.warning(
+                self,
+                "Import issues",
+                "Some files could not be imported:\n\n" + "\n".join(errors),
+            )
+
+    def _allocate_text_path(self, src_path: Path) -> Path:
+        """
+        Decide how to name canonical text files in texts/.
+        For now: doc-N.txt, independent of original filename.
+        """
+        # Very naive incremental scheme – good enough for now
+        # Later you will want this tied to a documents table (ID → filename).
+        existing = list(self.texts_dir.glob("doc-*.txt"))
+        next_id = len(existing) + 1
+        return self.texts_dir / f"doc-{next_id:04d}.txt"

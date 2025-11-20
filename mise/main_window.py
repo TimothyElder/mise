@@ -87,19 +87,17 @@ class WelcomeWidget(QWidget):
         if not ok or not project_name:
             return
 
-        # Attempt to create the project directory
+        # Create project directory
         try:
-            create_project_directory(project_name, dirpath)
+            project_root = create_project_directory(project_name, dirpath)
             QMessageBox.information(self, "Success", f"Project '{project_name}' created successfully.")
+            self.parent().setCentralWidget(ProjectWindow(project_name, project_root))
 
-            # Open ProjectWindow
-            self.parent().setCentralWidget(ProjectWindow(project_name, dirpath))
         except Exception as e:
             QMessageBox.critical(self, "Error", str(e))
 
     def open_project(self):
         dirpath = QFileDialog.getExistingDirectory(self, "Select Directory for Project")
-
 
         print(type(dirpath))
         print(type(os.path.basename(dirpath)))

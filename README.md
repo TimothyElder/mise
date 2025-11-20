@@ -5,12 +5,14 @@
 
 The ambition for [Mise](https://en.wikipedia.org/wiki/Mise_en_place) is to make it an open source qualitative data analysis tool that social scientists can use as an alternative to some of the more bloated and expensive proprietary software out there. It is meant to preserve some of the functionality that can be found in software like atlas.ti or Dedoose while having no cost and a more straightforward design.
 
-Proposed Order of Development
+## Proposed Order of Development
+
 1.	Data Manager (Backend)
     - Define how documents and codes will be stored and retrieved.
     - Decide whether to use JSON, SQLite, or another format.
     - Implement basic CRUD operations for documents and codes.
     - Example: A Project class that manages documents and a Code class to store and handle codes.
+    - What database to use?
 2.	Text Processing
     - Implement logic for tagging and calculating co-occurrence relationships between codes.
     - This is also where algorithms for analyzing text (e.g., tokenization, counting) will live.
