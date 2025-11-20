@@ -25,3 +25,13 @@ The ambition for [Mise](https://en.wikipedia.org/wiki/Mise_en_place) is to make 
 5.	Incremental GUI Features
     - Build and connect each GUI feature to the backend step by step.
     - Start with simple document management and then add more complex functionality like tagging and visualization.
+
+## Some Helpers
+
+For visualizing dependencies
+
+```
+pyreverse -o png -p mise mise
+pydeps mise --max-bacon=2 --show-deps
+
+```

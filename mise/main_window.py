@@ -7,9 +7,6 @@ from PySide6.QtCore import Qt, QDir
 
 from pathlib import Path
 
-
-import os
-
 from mise.project_window import ProjectWindow
 from mise.project_init import create_project
 
@@ -83,7 +80,10 @@ class WelcomeWidget(QWidget):
         layout.addLayout(logo_layout)
 
     def create_new_project(self):
-    # Get the directory
+        """
+        Calls function that creates project, using user defined project
+        from file dialog box and sepcified project name.
+        """
         dirpath = QFileDialog.getExistingDirectory(
             self,
             "Select Directory for Project",

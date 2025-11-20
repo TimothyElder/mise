@@ -1,5 +1,7 @@
 # Plan
 
+Deleting Codes from document
+
 A minimally working piece of software will require the following features:
 
 1. Loading data into Mise

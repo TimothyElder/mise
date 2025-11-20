@@ -3,16 +3,10 @@ from pathlib import Path
 
 SCHEMA = """
 CREATE TABLE documents (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    uuid TEXT NOT NULL UNIQUE,
-    label TEXT NOT NULL,
-    original_name TEXT NOT NULL,
-    original_path TEXT,
-    text_path TEXT NOT NULL,
-    mime_type TEXT,
-    checksum TEXT,
-    created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    label      TEXT NOT NULL,
+    text_path  TEXT NOT NULL,
+    created_at TEXT NOT NULL
 );
 
 CREATE TABLE codes (
@@ -25,14 +19,13 @@ CREATE TABLE codes (
 );
 
 CREATE TABLE coded_segments (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    document_id INTEGER NOT NULL REFERENCES documents(id),
-    code_id TEXT NOT NULL REFERENCES codes(id),
-    start_offset INTEGER NOT NULL,
-    end_offset INTEGER NOT NULL,
-    memo TEXT,
-    created_at TEXT NOT NULL,
-    created_by TEXT
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    document_id   INTEGER NOT NULL REFERENCES documents(id),
+    code_id       TEXT NOT NULL REFERENCES codes(id),
+    start_offset  INTEGER NOT NULL,
+    end_offset    INTEGER NOT NULL,
+    memo          TEXT,
+    created_at    TEXT NOT NULL
 );
 """
 

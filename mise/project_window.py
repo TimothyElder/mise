@@ -1,18 +1,17 @@
 from PySide6.QtWidgets import (
     QMainWindow, QSplitter, QVBoxLayout, QWidget, QListWidget,
-    QTextBrowser, QLabel, QPushButton, QListWidgetItem,
-    QFileDialog, QMessageBox
+    QTextBrowser, QPushButton, QListWidgetItem,
+    QFileDialog, QMessageBox, QDialog
 )
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QIcon, QTextCursor, QTextCharFormat, QColor
 from PySide6.QtCore import Qt
+
 from pathlib import Path
-import os
 
+from mise.utils.import_service import import_files
+from mise.utils.project_repository import ProjectRepository
 from mise.code_manager import CodeManager
-from mise.utils.file_io import convert_to_canonical_text
-
-# Allowed file types to upload
-ALLOWED_EXTENSIONS = {".pdf", ".docx", ".doc", ".md", ".markdown"}
+from mise.code_picker import CodePickerDialog
 
 class ProjectWindow(QMainWindow):
     def __init__(self, project_name, project_root):
@@ -20,11 +19,18 @@ class ProjectWindow(QMainWindow):
         self.setWindowTitle(f"Mise - {project_name}")
         self.resize(1200, 800)
 
-        # Store paths
+        # State
+        self.current_document_id = None
+
+        # Paths
         self.project_name = project_name
         self.project_root = Path(project_root)
         self.texts_dir = self.project_root / "texts"
         self.current_path = self.texts_dir
+
+       # Open Database connection via repository
+        self.db_path = self.project_root / "project.db"
+        self.repo = ProjectRepository(self.db_path)
 
         # Main widget
         splitter = QSplitter()
@@ -40,7 +46,6 @@ class ProjectWindow(QMainWindow):
         left_layout.addWidget(self.back_button)
 
         self.file_list = QListWidget()
-        # Use current_path (or project_root) instead of undefined project_root
         self.populate_file_list(self.current_path)
         left_layout.addWidget(self.file_list)
 
@@ -55,8 +60,11 @@ class ProjectWindow(QMainWindow):
         self.document_viewer.setText("Select a document to view its content.")
         splitter.addWidget(self.document_viewer)
 
+        self.document_viewer.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.document_viewer.customContextMenuRequested.connect(self.open_text_context_menu)
+
         # Right: Code manager
-        self.code_manager = QLabel("Code Manager Placeholder")
+        self.code_manager = CodeManager(self.repo.connection)
         splitter.addWidget(self.code_manager)
 
         splitter.setSizes([200, 600, 400])
@@ -103,19 +111,20 @@ class ProjectWindow(QMainWindow):
 
 
     def handle_item_click(self, item):
-        """
-        Handle clicks on items in the file list.
-        """
-        item_name = item.text()
-        full_path = self.current_path / item_name  # if using Path objects
+        full_path = Path(item.data(Qt.UserRole))
 
         if full_path.is_dir():
-            # Move "into" the directory
             self.current_path = full_path
             self.populate_file_list(self.current_path)
-            # enable back button etc. here
         else:
+            doc_id = self.repo.lookup_document_id(full_path)
+            if doc_id is None:
+                print(f"[WARN] File not registered in documents: {full_path}")
+            self.current_document_id = doc_id
+
             self.display_file_content(full_path)
+
+        self.refresh_highlights()
 
     def display_file_content(self, filepath):
         """
@@ -130,17 +139,18 @@ class ProjectWindow(QMainWindow):
 
     def go_back(self):
         """
-        Navigate back to the parent directory, emulating 'cd ..' behavior.
+        Navigate back to the parent directory, but never above project_root.
         """
-        parent_path = os.path.dirname(self.project_root)  # Get the parent directory
+        if self.current_path == self.project_root:
+            return  # already at root, nothing to do
 
-        # Ensure we don't navigate above the root project directory
-        if os.path.abspath(parent_path) != os.path.abspath(self.project_root):
-            self.project_root = parent_path
-            self.populate_file_list(parent_path)
+        parent = self.current_path.parent
+
+        # Only allow going back within the project tree
+        if parent == self.project_root or self.project_root in parent.parents:
+            self.populate_file_list(parent)
 
     def handle_upload_clicked(self):
-        # 1) Open dialog for multiple files
         dialog_filter = (
             "Documents (*.pdf *.docx *.doc *.md *.markdown);;"
             "All Files (*)"
@@ -148,38 +158,16 @@ class ProjectWindow(QMainWindow):
         file_paths, _ = QFileDialog.getOpenFileNames(
             self,
             "Select documents to import",
-            "",                # start dir; you can use last-used dir later
+            "",
             dialog_filter,
         )
         if not file_paths:
             return  # user cancelled
 
-        # 2) Process each file
-        imported_any = False
-        errors = []
+        src_paths = [Path(src) for src in file_paths]
+        imported_any, errors = import_files(src_paths, self.texts_dir, self.repo)
 
-        for src in file_paths:
-            src_path = Path(src)
-            ext = src_path.suffix.lower()
-
-            if ext not in ALLOWED_EXTENSIONS:
-                errors.append(f"{src_path.name}: unsupported extension '{ext}'")
-                continue
-
-            try:
-                text = convert_to_canonical_text(src_path)    # we'll define this below
-                dest_path = self._allocate_text_path(src_path)
-                dest_path.write_text(text, encoding="utf-8")
-
-                # TODO: insert a row in documents table here later
-
-                imported_any = True
-            except Exception as e:
-                errors.append(f"{src_path.name}: {e}")
-
-        # 3) Feedback + refresh view
         if imported_any:
-            # however you show files – maybe list contents of self.texts_dir
             self.populate_file_list(self.texts_dir)
 
         if errors:
@@ -188,14 +176,75 @@ class ProjectWindow(QMainWindow):
                 "Import issues",
                 "Some files could not be imported:\n\n" + "\n".join(errors),
             )
+    
+    def closeEvent(self, event):
+        """
+        Close database connection
+        """
+        if hasattr(self, "repo"):
+            self.repo.close()
+        super().closeEvent(event)
+    
+    def open_text_context_menu(self, pos):
+        """
+        Adds assign code functionally on right click in document viewer"""
+        menu = self.document_viewer.createStandardContextMenu()
 
-    def _allocate_text_path(self, src_path: Path) -> Path:
+        cursor = self.document_viewer.textCursor()
+        if cursor.hasSelection():
+            menu.addSeparator()
+            assign = menu.addAction("Assign Code…")
+            assign.triggered.connect(self.assign_code_to_selection)
+
+        menu.exec(self.document_viewer.mapToGlobal(pos))
+
+    def assign_code_to_selection(self):
         """
-        Decide how to name canonical text files in texts/.
-        For now: doc-N.txt, independent of original filename.
+        Assign code to segment of text
         """
-        # Very naive incremental scheme – good enough for now
-        # Later you will want this tied to a documents table (ID → filename).
-        existing = list(self.texts_dir.glob("doc-*.txt"))
-        next_id = len(existing) + 1
-        return self.texts_dir / f"doc-{next_id:04d}.txt"
+        if self.current_document_id is None:
+            return
+
+        cursor = self.document_viewer.textCursor()
+        if not cursor.hasSelection():
+            return
+
+        dialog = CodePickerDialog(self.repo.connection, self)
+        if dialog.exec() != QDialog.Accepted:
+            return
+
+        code_id = dialog.get_code_id()
+        if code_id is None:
+            return
+
+        start = cursor.selectionStart()
+        end = cursor.selectionEnd()
+
+        self.repo.add_coded_segment(
+            document_id=self.current_document_id,
+            code_id=code_id,
+            start_offset=start,
+            end_offset=end,
+            memo=None,  # or hook up a memo dialog later
+        )
+
+        self.refresh_highlights()
+
+    def refresh_highlights(self):
+        if self.current_document_id is None:
+            return
+
+        cursor = self.document_viewer.textCursor()
+        cursor.select(QTextCursor.Document)
+        default_format = QTextCharFormat()
+        cursor.setCharFormat(default_format)
+
+        rows = self.repo.get_coded_segments(self.current_document_id)
+
+        for seg in rows:
+            fmt = QTextCharFormat()
+            fmt.setBackground(QColor("yellow"))  # TODO: look up from codes table
+
+            cursor.setPosition(seg["start_offset"])
+            cursor.setPosition(seg["end_offset"], QTextCursor.KeepAnchor)
+            cursor.setCharFormat(fmt)

@@ -1,15 +1,12 @@
-
-import os
 from pathlib import Path
 from .database import initialize_database
 from .metadata import initialize_metadata
-from mise.utils.gen_utils import is_pathname_valid
-
 
 def create_project(project_name: str, dirpath: str) -> Path:
     """
     High-level project creation.
-    Creates project directory, database, and metadata files.
+    Calls function that creates directory and touches off database
+    and metadata
     Returns project_root Path.
     """
    
@@ -21,6 +18,12 @@ def create_project(project_name: str, dirpath: str) -> Path:
     return project_root
 
 def create_project_directory(project_name: str, dirpath: str) -> Path:
+    """
+    Creates the directory for the project with subdirectories for metadata
+    and text data
+    Returns project_root path
+    """
+
     dirpath = Path(dirpath)
     project_root = dirpath / f"{project_name}.mise"
 
