@@ -1,16 +1,18 @@
-from PySide6.QtWidgets import QMainWindow, QSplitter, QVBoxLayout, QWidget, QListWidget, QTextBrowser, QLabel, QPushButton, QListWidgetItem, QFileDialog, QMessageBox
+from PySide6.QtWidgets import (
+    QMainWindow, QSplitter, QVBoxLayout, QWidget, QListWidget,
+    QTextBrowser, QLabel, QPushButton, QListWidgetItem,
+    QFileDialog, QMessageBox
+)
 from PySide6.QtGui import QIcon
+from PySide6.QtCore import Qt
 from pathlib import Path
 import os
 
 from mise.code_manager import CodeManager
 from mise.utils.file_io import convert_to_canonical_text
 
-
-
 # Allowed file types to upload
 ALLOWED_EXTENSIONS = {".pdf", ".docx", ".doc", ".md", ".markdown"}
-
 
 class ProjectWindow(QMainWindow):
     def __init__(self, project_name, project_root):
@@ -21,8 +23,8 @@ class ProjectWindow(QMainWindow):
         # Store paths
         self.project_name = project_name
         self.project_root = Path(project_root)
-        self.current_path = self.project_root
         self.texts_dir = self.project_root / "texts"
+        self.current_path = self.texts_dir
 
         # Main widget
         splitter = QSplitter()
@@ -61,46 +63,58 @@ class ProjectWindow(QMainWindow):
 
         self.file_list.itemClicked.connect(self.handle_item_click)
 
-    def populate_file_list(self, directory):
+    def populate_file_list(self, directory: Path):
         """
         Populate the QListWidget with directories and files from the given directory.
+        `directory` is a Path.
         """
-        self.file_list.clear()  # Clear the current list
+        directory = Path(directory)
+        self.current_path = directory
+
+        self.file_list.clear()
 
         # Enable or disable the back button based on directory
-        self.back_button.setEnabled(os.path.abspath(directory) != self.project_root)
+        self.back_button.setEnabled(self.current_path != self.project_root)
 
         # Set icons
-        folder_icon = QIcon(os.path.join(os.path.dirname(__file__), "assets", "folder.png"))
-        file_icon = QIcon(os.path.join(os.path.dirname(__file__), "assets", "document.png"))
+        assets_dir = Path(__file__).resolve().parent / "assets"
+        folder_icon = QIcon(str(assets_dir / "folder.png"))
+        file_icon = QIcon(str(assets_dir / "document.png"))
 
         try:
-            items = os.listdir(directory)
-            for item in sorted(items):
-                full_path = os.path.join(directory, item)
-                list_item = QListWidgetItem()
-                list_item.setText(item)
-                if os.path.isdir(full_path):
-                    list_item.setIcon(folder_icon)  # Use folder icon
+            # Sort: folders first, then files, both alphabetically
+            children = sorted(
+                self.current_path.iterdir(),
+                key=lambda p: (not p.is_dir(), p.name.lower())
+            )
+            for child in children:
+                list_item = QListWidgetItem(child.name)
+                if child.is_dir():
+                    list_item.setIcon(folder_icon)
                 else:
-                    list_item.setIcon(file_icon)  # Use file icon
+                    list_item.setIcon(file_icon)
+
+                # Store full path on the item for later use
+                list_item.setData(Qt.UserRole, str(child))
+
                 self.file_list.addItem(list_item)
         except Exception as e:
-            print(f"Error accessing directory {directory}: {e}")
+            print(f"Error accessing directory {self.current_path}: {e}")
+
 
     def handle_item_click(self, item):
         """
         Handle clicks on items in the file list.
         """
         item_name = item.text()
-        full_path = os.path.join(self.texts_dir, item_name)
+        full_path = self.current_path / item_name  # if using Path objects
 
-        if os.path.isdir(full_path):
-            # If it's a directory, populate the list with its contents
-            self.project_root = full_path  # Update project path to the subdirectory
-            self.populate_file_list(full_path)
+        if full_path.is_dir():
+            # Move "into" the directory
+            self.current_path = full_path
+            self.populate_file_list(self.current_path)
+            # enable back button etc. here
         else:
-            # If it's a file, display its content in the document viewer
             self.display_file_content(full_path)
 
     def display_file_content(self, filepath):

@@ -1,11 +1,17 @@
-from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QFileDialog, QInputDialog, QMessageBox
+from PySide6.QtWidgets import (
+    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
+    QFileDialog, QInputDialog, QMessageBox
+)
 from PySide6.QtGui import QPixmap
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QDir
+
+from pathlib import Path
+
 
 import os
 
-from mise.project_manager import create_project_directory
 from mise.project_window import ProjectWindow
+from mise.project_init import create_project
 
 
 class MainWindow(QMainWindow):
@@ -48,7 +54,7 @@ class WelcomeWidget(QWidget):
 
         # Right side: logo and description
         logo_layout = QVBoxLayout()
-                # Load the logo image
+        # Load the logo image
         logo_label = QLabel()
         pixmap = QPixmap("data/mise.png").scaled(500, 500, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         logo_label.setPixmap(pixmap)
@@ -57,6 +63,7 @@ class WelcomeWidget(QWidget):
         # Add the logo to the layout
         layout.addWidget(logo_label)
         logo_label.setAlignment(Qt.AlignCenter)
+
         description_label = QLabel()
         description_label.setText(
             """<p style="font-size: 14px; color: grey;">Mise ("<em>meez</em>") is an qualitative data analysis tool designed to place good principles at the heart of software.</p>
@@ -69,16 +76,19 @@ class WelcomeWidget(QWidget):
 
                 <p>Suggestions or bugs can be reported to <a href="mailto:timothy.b.elder@dartmouth.edu">Timothy.B.Elder@dartmouth.edu</a></p>
             """)
-        description_label.setAlignment(Qt.AlignLeft)
+        description_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         description_label.setWordWrap(True)
 
-        logo_layout.addWidget(logo_label)
         logo_layout.addWidget(description_label)
         layout.addLayout(logo_layout)
 
     def create_new_project(self):
     # Get the directory
-        dirpath = QFileDialog.getExistingDirectory(self, "Select Directory for Project")
+        dirpath = QFileDialog.getExistingDirectory(
+            self,
+            "Select Directory for Project",
+            QDir.homePath(),   # start in OS home directory
+)
         if not dirpath:
             return
 
@@ -89,21 +99,46 @@ class WelcomeWidget(QWidget):
 
         # Create project directory
         try:
-            project_root = create_project_directory(project_name, dirpath)
+            project_root = create_project(project_name, dirpath)
             QMessageBox.information(self, "Success", f"Project '{project_name}' created successfully.")
-            self.parent().setCentralWidget(ProjectWindow(project_name, project_root))
+            main_window = self.window()
+            main_window.setCentralWidget(ProjectWindow(project_name, project_root))
 
         except Exception as e:
             QMessageBox.critical(self, "Error", str(e))
 
     def open_project(self):
-        dirpath = QFileDialog.getExistingDirectory(self, "Select Directory for Project")
+        # Let the user pick the *project root* (the .mise folder)
+        dirpath_str = QFileDialog.getExistingDirectory(
+            self,
+            "Select Mise Project Directory",
+            QDir.homePath(),
+            )
+        if not dirpath_str:
+            return  # user cancelled
 
-        print(type(dirpath))
-        print(type(os.path.basename(dirpath)))
-        if not dirpath:
+        project_root = Path(dirpath_str)
+
+        # Basic validation: must be a directory and look like a Mise project
+        if not project_root.is_dir():
+            QMessageBox.warning(self, "Invalid project", "The selected path is not a directory.")
             return
-        
-        # THis is broken as the ProjectWindow Class was designed only with new projects in mind:
-        # TypeError: ProjectWindow.__init__() missing 1 required positional argument: 'project_path'
-        self.parent().setCentralWidget(ProjectWindow(os.path.basename(dirpath), dirpath))
+
+        # Require project.db and texts/ for now
+        if not (project_root / "project.db").exists() or not (project_root / "texts").is_dir():
+            QMessageBox.warning(
+                self,
+                "Invalid project",
+                "The selected folder does not appear to be a Mise project.\n"
+                "It should contain 'project.db' and a 'texts' directory."
+            )
+            return
+
+        # Derive project_name from folder name, stripping .mise if present
+        project_name = project_root.name
+        if project_name.endswith(".mise"):
+            project_name = project_name[:-5]
+
+        # Swap the central widget to a ProjectWindow
+        main_window = self.window()
+        main_window.setCentralWidget(ProjectWindow(project_name, project_root))
