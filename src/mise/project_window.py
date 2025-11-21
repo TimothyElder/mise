@@ -12,10 +12,15 @@ from PySide6.QtCore import Qt
 
 from pathlib import Path
 
-from mise.utils.import_service import import_files
-from mise.utils.project_repository import ProjectRepository
-from mise.code_manager import CodeManager
-from mise.code_picker import CodePickerDialog
+from .utils.import_service import import_files
+from .utils.project_repository import ProjectRepository
+from .code_manager import CodeManager
+from .code_picker import CodePickerDialog
+
+ASSETS_DIR = Path(__file__).resolve().parent / "assets"
+
+def asset_path(name: str) -> str:
+    return str(ASSETS_DIR / name)
 
 class ProjectWidget(QWidget):
     
@@ -93,10 +98,8 @@ class ProjectWidget(QWidget):
         # Enable or disable the back button based on directory
         self.back_button.setEnabled(self.current_path != self.project_root)
 
-        # Set icons
-        assets_dir = Path(__file__).resolve().parent / "assets"
-        folder_icon = QIcon(str(assets_dir / "folder.png"))
-        file_icon = QIcon(str(assets_dir / "document.png"))
+        folder_icon = QIcon(asset_path("folder.png"))
+        file_icon = QIcon(asset_path("document.png"))
 
         try:
             # Sort: folders first, then files, both alphabetically

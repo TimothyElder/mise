@@ -7,9 +7,14 @@ from PySide6.QtCore import Qt, QDir
 
 from pathlib import Path
 
-from mise.project_window import ProjectWidget
-from mise.project_init import create_project
-from mise.analysis.analysis_widget import AnalysisWidget
+from .project_window import ProjectWidget
+from .project_init import create_project
+from .analysis.analysis_widget import AnalysisWidget
+
+ASSETS_DIR = Path(__file__).resolve().parent / "assets"
+
+def asset_path(name: str) -> str:
+    return str(ASSETS_DIR / name)
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -153,7 +158,7 @@ class WelcomeWidget(QWidget):
         logo_layout = QVBoxLayout()
         # Load the logo image
         logo_label = QLabel()
-        pixmap = QPixmap("data/mise.png").scaled(500, 500, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        pixmap = QPixmap(asset_path("mise.png")).scaled(500, 500, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         logo_label.setPixmap(pixmap)
         logo_label.setAlignment(Qt.AlignCenter)
 

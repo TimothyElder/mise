@@ -1,8 +1,8 @@
 import sys
 from PySide6.QtWidgets import QApplication
-from mise.main_window import MainWindow
+from .main_window import MainWindow
 
-if __name__ == "__main__":
+def run():
     app = QApplication(sys.argv)
 
     app.setDesktopFileName("Mise")

@@ -6,7 +6,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor
 
-from mise.utils.project_repository import ProjectRepository
+from .utils.project_repository import ProjectRepository
 
 class CodeManager(QWidget):
     codes_updated = Signal()

@@ -1,5 +1,5 @@
 from pathlib import Path
-from mise.utils.file_io import convert_to_canonical_text
+from .file_io import convert_to_canonical_text
 
 ALLOWED_EXTENSIONS = {".pdf", ".docx", ".doc", ".md", ".markdown"}
 
