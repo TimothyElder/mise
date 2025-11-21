@@ -29,7 +29,6 @@ CREATE TABLE coded_segments (
 );
 """
 
-
 def initialize_database(project_root: Path):
     """Create project.db with all tables."""
     db_path = Path(project_root) / "project.db"

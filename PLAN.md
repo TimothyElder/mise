@@ -91,3 +91,5 @@ CREATE TABLE coded_segments (
 # `todo`
 
 - add PDF reading and conversion to `mise/utils/file_io.py` with function `read_pdf`
+- code_manager.py "right click" → "edit code" → dialog edit code 
+- Eventually, need to get a pyinstaller instance installed.

@@ -7,7 +7,7 @@ from PySide6.QtCore import Qt, QDir
 
 from pathlib import Path
 
-from mise.project_window import ProjectWindow
+from mise.project_window import ProjectWidget
 from mise.project_init import create_project
 
 
@@ -21,63 +21,23 @@ class MainWindow(QMainWindow):
         self._create_menu_bar()
 
         # Set up the welcome widget
-        self.welcome_widget = WelcomeWidget()
-        self.setCentralWidget(self.welcome_widget)
+        welcome = WelcomeWidget(on_new_project=self.create_new_project, on_open_project=self.open_project)
+        self.setCentralWidget(welcome)
 
     def _create_menu_bar(self):
         menu_bar = self.menuBar()
         self.setMenuBar(menu_bar)
+        
         # You can add additional menu options later
         file_menu = menu_bar.addMenu("File")
+        
+        new_project = file_menu.addAction("Create New Project")
+        new_project.triggered.connect(self.create_new_project)
+
+        open_project = file_menu.addAction("Open Project")
+        open_project.triggered.connect(self.open_project)
+        
         about_menu = menu_bar.addMenu("About")
-
-class WelcomeWidget(QWidget):
-    def __init__(self):
-        super().__init__()
-
-        # Set up layout
-        layout = QHBoxLayout(self)
-
-        # Left side: buttons for "Create New Project" and "Open Project"
-        button_layout = QVBoxLayout()
-        create_button = QPushButton("Create New Project")
-        create_button.clicked.connect(self.create_new_project)
-        open_button = QPushButton("Open Project")
-        button_layout.addWidget(create_button)
-        button_layout.addWidget(open_button)
-        open_button.clicked.connect(self.open_project)
-        button_layout.setAlignment(Qt.AlignCenter)
-        layout.addLayout(button_layout)
-
-        # Right side: logo and description
-        logo_layout = QVBoxLayout()
-        # Load the logo image
-        logo_label = QLabel()
-        pixmap = QPixmap("data/mise.png").scaled(500, 500, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        logo_label.setPixmap(pixmap)
-        logo_label.setAlignment(Qt.AlignCenter)
-
-        # Add the logo to the layout
-        layout.addWidget(logo_label)
-        logo_label.setAlignment(Qt.AlignCenter)
-
-        description_label = QLabel()
-        description_label.setText(
-            """<p style="font-size: 14px; color: grey;">Mise ("<em>meez</em>") is an qualitative data analysis tool designed to place good principles at the heart of software.</p>
-               <p>There are a few principles that guide this software:</p>
-               <ul>
-                    <li>Codes should be applied to large chunks of text</li>
-                    <li>Everything should be accessible to the analyst</li>
-                    <li>Anlaysis should be made as transparent as possible</li>
-               </ul>
-
-                <p>Suggestions or bugs can be reported to <a href="mailto:timothy.b.elder@dartmouth.edu">Timothy.B.Elder@dartmouth.edu</a></p>
-            """)
-        description_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-        description_label.setWordWrap(True)
-
-        logo_layout.addWidget(description_label)
-        layout.addLayout(logo_layout)
 
     def create_new_project(self):
         """
@@ -88,7 +48,8 @@ class WelcomeWidget(QWidget):
             self,
             "Select Directory for Project",
             QDir.homePath(),   # start in OS home directory
-)
+            )
+        
         if not dirpath:
             return
 
@@ -101,8 +62,8 @@ class WelcomeWidget(QWidget):
         try:
             project_root = create_project(project_name, dirpath)
             QMessageBox.information(self, "Success", f"Project '{project_name}' created successfully.")
-            main_window = self.window()
-            main_window.setCentralWidget(ProjectWindow(project_name, project_root))
+            project = ProjectWidget(project_name, project_root)
+            self.setCentralWidget(project)
 
         except Exception as e:
             QMessageBox.critical(self, "Error", str(e))
@@ -139,6 +100,59 @@ class WelcomeWidget(QWidget):
         if project_name.endswith(".mise"):
             project_name = project_name[:-5]
 
-        # Swap the central widget to a ProjectWindow
-        main_window = self.window()
-        main_window.setCentralWidget(ProjectWindow(project_name, project_root))
+        # Swap the central widget to a ProjectWidget
+        project = ProjectWidget(project_name, project_root)
+        self.setCentralWidget(project)
+
+class WelcomeWidget(QWidget):
+    def __init__(self, on_new_project, on_open_project, parent=None):
+        super().__init__(parent)
+        
+        self.on_new_project = on_new_project
+        self.on_open_project = on_open_project
+
+        # Set up layout
+        layout = QHBoxLayout(self)
+
+        # Left side: buttons for "Create New Project" and "Open Project"
+        button_layout = QVBoxLayout()
+        create_button = QPushButton("Create New Project")
+        create_button.clicked.connect(self.on_new_project)
+        open_button = QPushButton("Open Project")
+        button_layout.addWidget(create_button)
+        button_layout.addWidget(open_button)
+        open_button.clicked.connect(self.on_open_project)
+        button_layout.setAlignment(Qt.AlignCenter)
+        layout.addLayout(button_layout)
+
+        # Right side: logo and description
+        logo_layout = QVBoxLayout()
+        # Load the logo image
+        logo_label = QLabel()
+        pixmap = QPixmap("data/mise.png").scaled(500, 500, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        logo_label.setPixmap(pixmap)
+        logo_label.setAlignment(Qt.AlignCenter)
+
+        # Add the logo to the layout
+        layout.addWidget(logo_label)
+        logo_label.setAlignment(Qt.AlignCenter)
+
+        description_label = QLabel()
+        description_label.setText(
+            """<p style="font-size: 14px; color: grey;">Mise ("<em>meez</em>") is an qualitative data analysis tool designed to place good principles at the heart of software.</p>
+               <p>There are a few principles that guide this software:</p>
+               <ul>
+                    <li>Codes should be applied to large chunks of text</li>
+                    <li>Everything should be accessible to the analyst</li>
+                    <li>Anlaysis should be made as transparent as possible</li>
+               </ul>
+
+                <p>Suggestions or bugs can be reported to <a href="mailto:timothy.b.elder@dartmouth.edu">Timothy.B.Elder@dartmouth.edu</a></p>
+
+                <p><a href="https://miseqda.com">miseqda.com</a></p>
+            """)
+        description_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        description_label.setWordWrap(True)
+
+        logo_layout.addWidget(description_label)
+        layout.addLayout(logo_layout)

@@ -1,14 +1,14 @@
+import sys
 from PySide6.QtWidgets import QApplication
-from mise.main_window import MainWindow  # Import your MainWindow class
+from mise.main_window import MainWindow
 
 if __name__ == "__main__":
-    app = QApplication([])
+    app = QApplication(sys.argv)
 
-    # Set the application name and organization
     app.setDesktopFileName("Mise")
     app.setApplicationName("Mise")
-    app.setOrganizationName("The Dartmouth Institute")  # Optional: Use your organization or leave it generic
+    app.setOrganizationName("The Dartmouth Institute")
 
     window = MainWindow()
     window.show()
-    app.exec()
+    sys.exit(app.exec())

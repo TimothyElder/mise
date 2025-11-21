@@ -1,9 +1,13 @@
 from PySide6.QtWidgets import (
     QMainWindow, QSplitter, QVBoxLayout, QWidget, QListWidget,
-    QTextBrowser, QPushButton, QListWidgetItem,
+    QTextBrowser, QPushButton, QListWidgetItem, QApplication,
     QFileDialog, QMessageBox, QDialog
 )
-from PySide6.QtGui import QIcon, QTextCursor, QTextCharFormat, QColor
+
+from PySide6.QtGui import (
+    QIcon, QTextCursor, QTextCharFormat, 
+    QColor, QKeySequence, QAction)
+
 from PySide6.QtCore import Qt
 
 from pathlib import Path
@@ -13,7 +17,7 @@ from mise.utils.project_repository import ProjectRepository
 from mise.code_manager import CodeManager
 from mise.code_picker import CodePickerDialog
 
-class ProjectWindow(QMainWindow):
+class ProjectWidget(QWidget):
     def __init__(self, project_name, project_root):
         super().__init__()
         self.setWindowTitle(f"Mise - {project_name}")
@@ -32,9 +36,12 @@ class ProjectWindow(QMainWindow):
         self.db_path = self.project_root / "project.db"
         self.repo = ProjectRepository(self.db_path)
 
-        # Main widget
-        splitter = QSplitter()
-        self.setCentralWidget(splitter)
+        # Top-level layout on this widget
+        main_layout = QVBoxLayout(self)
+
+        # The splitter is now just a child widget
+        splitter = QSplitter(self)
+        main_layout.addWidget(splitter)
 
         # Left: File list with back button
         left_widget = QWidget()
@@ -64,9 +71,8 @@ class ProjectWindow(QMainWindow):
         self.document_viewer.customContextMenuRequested.connect(self.open_text_context_menu)
 
         # Right: Code manager
-        self.code_manager = CodeManager(self.repo.connection)
+        self.code_manager = CodeManager(self.repo)
         splitter.addWidget(self.code_manager)
-
         splitter.setSizes([200, 600, 400])
 
         self.file_list.itemClicked.connect(self.handle_item_click)
@@ -240,10 +246,21 @@ class ProjectWindow(QMainWindow):
         cursor.setCharFormat(default_format)
 
         rows = self.repo.get_coded_segments(self.current_document_id)
+        print("refresh_highlights: found", len(rows), "segments")  # keep or drop
 
         for seg in rows:
             fmt = QTextCharFormat()
-            fmt.setBackground(QColor("yellow"))  # TODO: look up from codes table
+
+            # use the code color if present, otherwise a default
+            code_color = seg["code_color"]
+            if code_color:
+                qcolor = QColor(code_color)
+                if qcolor.isValid():
+                    fmt.setBackground(qcolor)
+                else:
+                    fmt.setBackground(QColor("yellow"))
+            else:
+                fmt.setBackground(QColor("yellow"))
 
             cursor.setPosition(seg["start_offset"])
             cursor.setPosition(seg["end_offset"], QTextCursor.KeepAnchor)
