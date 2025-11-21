@@ -9,7 +9,7 @@ from pathlib import Path
 
 from mise.project_window import ProjectWidget
 from mise.project_init import create_project
-
+from mise.analysis.analysis_widget import AnalysisWidget
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -25,6 +25,8 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(welcome)
 
     def _create_menu_bar(self):
+
+        print("creating menu bar")
         menu_bar = self.menuBar()
         self.setMenuBar(menu_bar)
         
@@ -36,8 +38,20 @@ class MainWindow(QMainWindow):
 
         open_project = file_menu.addAction("Open Project")
         open_project.triggered.connect(self.open_project)
+
+        help_menu = menu_bar.addMenu("Help")
+        thing = help_menu.addAction("Some Help")
         
-        about_menu = menu_bar.addMenu("About")
+
+        view_menu = menu_bar.addMenu("View")
+        switch_to_analysis = view_menu.addAction("Open Analysis")
+        switch_to_analysis.triggered.connect(self.open_analysis)
+        about_mise = view_menu.addAction("About Mise")
+        about_mise.triggered.connect(self.show_about_dialog)
+
+    def open_analysis(self):
+        analysis = AnalysisWidget()
+        self.setCentralWidget(analysis)
 
     def create_new_project(self):
         """
@@ -104,6 +118,16 @@ class MainWindow(QMainWindow):
         project = ProjectWidget(project_name, project_root)
         self.setCentralWidget(project)
 
+    def show_about_dialog(self):
+        QMessageBox.about(
+            self,
+            "About Mise",
+            "<b>Mise</b><br>"
+            "An open-source qualitative data analysis tool.<br><br>"
+            "Version 0.0.1<br>"
+            "<a href='https://miseqda.com'>miseqda.com</a>"
+        )
+
 class WelcomeWidget(QWidget):
     def __init__(self, on_new_project, on_open_project, parent=None):
         super().__init__(parent)
@@ -147,9 +171,9 @@ class WelcomeWidget(QWidget):
                     <li>Anlaysis should be made as transparent as possible</li>
                </ul>
 
-                <p>Suggestions or bugs can be reported to <a href="mailto:timothy.b.elder@dartmouth.edu">Timothy.B.Elder@dartmouth.edu</a></p>
+                <p>Suggestions or bugs can be reported to <a href='mailto:timothy.b.elder@dartmouth.edu'>timothy.b.elder@dartmouth.edu</a></p>
 
-                <p><a href="https://miseqda.com">miseqda.com</a></p>
+                <p><a href='https://miseqda.com'>miseqda.com</a></p>
             """)
         description_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         description_label.setWordWrap(True)

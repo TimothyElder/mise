@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QPushButton, QTreeWidget, QTreeWidgetItem, QColorDialog,
     QDialog, QLineEdit, QComboBox, QDialogButtonBox, QPlainTextEdit, QFormLayout,
-    QMenu, QStyledItemDelegate
+    QMenu
 )
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor
@@ -150,8 +150,21 @@ class CodeManager(QWidget):
         edit = menu.addAction("Edit Code…")
         edit.triggered.connect(lambda: self._on_edit_code_requested(code_id))
 
+        delete = menu.addAction("Delete Code…")
+        delete.triggered.connect(lambda: self._on_delete_code_requested(code_id))
+
         global_pos = self.tree.viewport().mapToGlobal(pos)
         menu.exec(global_pos)
+
+    def _on_delete_code_requested(self, code_id):
+        """
+        Send delete request to ProjectRepository
+        """
+        self.repo.delete_code(code_id)
+        print(f"deleted code ID == {code_id}")
+
+        self.refresh()
+        self.codes_updated.emit()
     
     def _on_edit_code_requested(self, code_id):
 

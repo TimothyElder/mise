@@ -97,6 +97,16 @@ class ProjectRepository:
         )
         self.conn.commit()
         return cur.rowcount
+    
+    def delete_code(self, code_id):
+        
+        # delete coded segments from the coded_segments table
+        self.conn.execute("DELETE FROM coded_segments WHERE code_id = ?", (code_id,))
+
+        # Delete the code from the codes table
+        self.conn.execute("DELETE FROM codes WHERE id = ?", (code_id,))
+        self.conn.commit()
+
 
     # ---- coded_segments --------------------------------------------
     def get_coded_segments(self, document_id: int):
@@ -133,6 +143,25 @@ class ProjectRepository:
         )
         self.conn.commit()
         return cur.lastrowid
+    
+    def get_segment_at_position(self, document_id, pos):
+        row = self.conn.execute(
+            """
+            SELECT id, code_id, start_offset, end_offset
+            FROM coded_segments
+            WHERE document_id = ?
+            AND start_offset <= ?
+            AND end_offset >= ?
+            LIMIT 1;
+            """,
+            (document_id, pos, pos),
+        ).fetchone()
+        return row
+    
+    def delete_segment(self, segment_id):
+        # Delete the segment from the coded_segment by segment_id
+        self.conn.execute("DELETE FROM coded_segments WHERE id = ?", (segment_id,))
+        self.conn.commit()
 
     # ---- lifecycle -------------------------------------------------
     def close(self) -> None:

@@ -35,10 +35,10 @@ class ProjectWidget(QWidget):
         self.db_path = self.project_root / "project.db"
         self.repo = ProjectRepository(self.db_path)
 
-        # Top-level layout on this widget
+
         main_layout = QVBoxLayout(self)
 
-        # The splitter is now just a child widget
+
         splitter = QSplitter(self)
         main_layout.addWidget(splitter)
 
@@ -122,6 +122,7 @@ class ProjectWidget(QWidget):
     def handle_item_click(self, item):
         full_path = Path(item.data(Qt.UserRole))
 
+
         if full_path.is_dir():
             self.current_path = full_path
             self.populate_file_list(self.current_path)
@@ -130,6 +131,7 @@ class ProjectWidget(QWidget):
             if doc_id is None:
                 print(f"[WARN] File not registered in documents: {full_path}")
             self.current_document_id = doc_id
+            print(f"doc_id from click is {doc_id}" )
 
             self.display_file_content(full_path)
 
@@ -196,8 +198,22 @@ class ProjectWidget(QWidget):
     
     def open_text_context_menu(self, pos):
         """
-        Adds assign code functionally on right click in document viewer"""
+        Adds assign code functionally on right click in document viewer
+        """
+        cursor = self.document_viewer.cursorForPosition(pos)
+        char_pos = cursor.position()
+
+        segment = self.repo.get_segment_at_position(self.current_document_id, char_pos)
+
         menu = self.document_viewer.createStandardContextMenu()
+
+        if segment is not None:
+            segment_id = segment["id"]
+            menu.addSeparator()
+            delete = menu.addAction("Delete Highlight")
+            delete.triggered.connect(
+                lambda _checked=False, seg_id=segment_id: self.delete_segment_and_refresh(seg_id)
+            )
 
         cursor = self.document_viewer.textCursor()
         if cursor.hasSelection():
@@ -206,6 +222,10 @@ class ProjectWidget(QWidget):
             assign.triggered.connect(self.assign_code_to_selection)
 
         menu.exec(self.document_viewer.mapToGlobal(pos))
+    
+    def delete_segment_and_refresh(self, segment_id):
+        self.repo.delete_segment(segment_id)
+        self.refresh_highlights()
 
     def assign_code_to_selection(self):
         """

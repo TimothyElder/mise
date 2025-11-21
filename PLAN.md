@@ -93,3 +93,5 @@ CREATE TABLE coded_segments (
 - add PDF reading and conversion to `mise/utils/file_io.py` with function `read_pdf`
 - code_manager.py "right click" → "edit code" → dialog edit code 
 - Eventually, need to get a pyinstaller instance installed.
+
+- For analysis widget, should include an option that automatically adds to the segment which is to say expands the text selection from the document to include more context. And need some function to pull up the document from a segment.
