@@ -1,14 +1,16 @@
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QPushButton, QTreeWidget, QTreeWidgetItem, QColorDialog,
     QDialog, QLineEdit, QComboBox, QDialogButtonBox, QPlainTextEdit, QFormLayout,
-    QMenu
+    QMenu, QStyledItemDelegate
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor
 
 from mise.utils.project_repository import ProjectRepository
 
 class CodeManager(QWidget):
+    codes_updated = Signal()
+
     def __init__(self, repo: ProjectRepository, parent=None):
         super().__init__(parent)
         self.repo = repo
@@ -18,7 +20,7 @@ class CodeManager(QWidget):
     def init_ui(self):
         layout = QVBoxLayout(self)
 
-        self.tree = QTreeWidget()
+        self.tree = CodeTreeWidget()
         self.tree.setHeaderLabels(["Code", "Color"])
         self.tree.setColumnCount(2)
         self.tree.setColumnWidth(1, 40)  # narrow color column
@@ -45,11 +47,13 @@ class CodeManager(QWidget):
         )
 
         if updated == 0:
-            # Decide what you want here: raise, log, or ignore.
             raise ValueError(f"No code found with id={code_id}")
+        
+        if updated > 0:
+            self.codes_updated.emit()
+            print("SIGNAL EMITED")
 
         return updated
-
 
     def list_codes(self):
         """
@@ -131,16 +135,49 @@ class CodeManager(QWidget):
         self.refresh()
 
     def open_context_menu(self, pos):
-        """Context menu for the code tree."""
-        item = self.tree.itemAt(pos)
+        """
+        Context menu for the code tree.
+        """
 
         menu = QMenu(self)
 
+        item = self.tree.itemAt(pos)
+        if item is None:
+            return  # right-click on empty area
+
+        code_id = item.data(0, Qt.UserRole)  # or wherever you stored it
+
         edit = menu.addAction("Edit Code…")
-        edit.triggered.connect(self.edit_code)
+        edit.triggered.connect(lambda: self._on_edit_code_requested(code_id))
 
         global_pos = self.tree.viewport().mapToGlobal(pos)
         menu.exec(global_pos)
+    
+    def _on_edit_code_requested(self, code_id):
+
+        # fetch current code info
+        row = self.repo.lookup_code(code_id)
+
+        # get user input
+        codes = self.list_codes()
+        dlg = CodeDialog(parent=self, codes=codes, existing=row)
+        if dlg.exec() != QDialog.Accepted:
+            return
+
+        data = dlg.get_data()
+        # data returns 
+        # {'label': 'pain-service', 'parent_id': None, 'description': 'A pain service one', 'color': '#ff6a88'}
+
+        # send user input to databas
+        self.edit_code(
+            code_id=code_id,
+            label=data["label"],
+            parent_id=data["parent_id"],
+            description=data["description"],
+            color=data["color"],
+        )
+
+        self.refresh()
 
 class CodeDialog(QDialog):
     """
@@ -211,14 +248,13 @@ class CodeDialog(QDialog):
         color = QColorDialog.getColor(parent=self)
         if color.isValid():
             self.color = color
-            # Optional: reflect it in the button
             self.color_button.setText(color.name())
-            # or set stylesheet: self.color_button.setStyleSheet(f"background:{color.name()};")
+            
 
     def get_data(self):
-        label = self.label_edit.text().strip() or None
-        parent_id = self.parent_combo.currentData()
-        description = self.desc_edit.toPlainText().strip() or None
+        label = self.label_edit.text().strip()      # must be non-empty; enforce in dialog
+        parent_id = self.parent_combo.currentData() # None for <No parent>, fine
+        description = self.desc_edit.toPlainText().strip()
         color = self.color.name() if self.color else None
 
         return {
@@ -227,3 +263,10 @@ class CodeDialog(QDialog):
             "description": description,
             "color": color,
         }
+
+class CodeTreeWidget(QTreeWidget):
+    def mousePressEvent(self, event):
+        item = self.itemAt(event.pos())
+        if item is None:
+            self.clearSelection()
+        super().mousePressEvent(event)

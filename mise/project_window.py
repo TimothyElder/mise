@@ -1,12 +1,12 @@
 from PySide6.QtWidgets import (
-    QMainWindow, QSplitter, QVBoxLayout, QWidget, QListWidget,
-    QTextBrowser, QPushButton, QListWidgetItem, QApplication,
+    QSplitter, QVBoxLayout, QWidget, QListWidget,
+    QTextBrowser, QPushButton, QListWidgetItem,
     QFileDialog, QMessageBox, QDialog
 )
 
 from PySide6.QtGui import (
     QIcon, QTextCursor, QTextCharFormat, 
-    QColor, QKeySequence, QAction)
+    QColor)
 
 from PySide6.QtCore import Qt
 
@@ -18,10 +18,9 @@ from mise.code_manager import CodeManager
 from mise.code_picker import CodePickerDialog
 
 class ProjectWidget(QWidget):
+    
     def __init__(self, project_name, project_root):
         super().__init__()
-        self.setWindowTitle(f"Mise - {project_name}")
-        self.resize(1200, 800)
 
         # State
         self.current_document_id = None
@@ -71,8 +70,12 @@ class ProjectWidget(QWidget):
         self.document_viewer.customContextMenuRequested.connect(self.open_text_context_menu)
 
         # Right: Code manager
-        self.code_manager = CodeManager(self.repo)
+        self.code_manager = CodeManager(
+            repo=self.repo,
+            parent=self
+        )
         splitter.addWidget(self.code_manager)
+        self.code_manager.codes_updated.connect(self.refresh_highlights)
         splitter.setSizes([200, 600, 400])
 
         self.file_list.itemClicked.connect(self.handle_item_click)

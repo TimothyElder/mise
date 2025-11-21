@@ -7,7 +7,8 @@ if __name__ == "__main__":
 
     app.setDesktopFileName("Mise")
     app.setApplicationName("Mise")
-    app.setOrganizationName("The Dartmouth Institute")
+    app.setApplicationVersion("0.0.1")
+    app.setOrganizationDomain("https://miseqda.come")
 
     window = MainWindow()
     window.show()

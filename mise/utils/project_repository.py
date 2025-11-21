@@ -31,6 +31,23 @@ class ProjectRepository:
         return row["id"] if row else None
     
     # ---- codes ------------------------------------------------------
+    def lookup_code(self, code_id):
+        """
+        lookup current code by its id and return the assigned values
+        """
+        row = self.conn.execute(
+            """
+            SELECT label, parent_id, description, color, sort_order
+            FROM codes
+            WHERE id = ?;
+            """,
+            (code_id,),
+        ).fetchone()
+
+        if row is None:
+            print(f"NO CODE matching ID == {code_id}")
+        return(row)
+    
     def list_codes(self):
         """
         Return all codes as sqlite Row objects.
@@ -66,33 +83,18 @@ class ProjectRepository:
         self.conn.commit()
         return code_id
     
-    def update_code(self, code_id, label=None, parent_id=None, description=None, color=None):
-        fields = []
-        values = []
-
-        if label is not None:
-            fields.append("label = ?")
-            values.append(label)
-
-        if parent_id is not None:
-            fields.append("parent_id = ?")
-            values.append(parent_id)
-
-        if description is not None:
-            fields.append("description = ?")
-            values.append(description)
-
-        if color is not None:
-            fields.append("color = ?")
-            values.append(color)
-
-        if not fields:
-            return 0  # nothing to update
-
-        sql = f"UPDATE codes SET {', '.join(fields)} WHERE id = ?;"
-        values.append(code_id)
-
-        cur = self.conn.execute(sql, values)
+    def update_code(self, code_id, label, parent_id, description, color):
+        cur = self.conn.execute(
+            """
+            UPDATE codes
+            SET label = ?,
+                parent_id = ?,
+                description = ?,
+                color = ?
+            WHERE id = ?;
+            """,
+            (label, parent_id, description, color, code_id),
+        )
         self.conn.commit()
         return cur.rowcount
 
