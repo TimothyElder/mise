@@ -6,7 +6,7 @@
       "type": "debugpy",
       "cwd": "/Users/timothyelder/Documents/mise",
       "request": "launch",
-      "program": "${file}",
+      "program": "/Users/timothyelder/Documents/mise/src/mise/__main__.py",
       "console": "integratedTerminal",
       "env": {
         "PYTHONPATH": "${workspaceFolder}/src"
