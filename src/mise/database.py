@@ -3,10 +3,12 @@ from pathlib import Path
 
 SCHEMA = """
 CREATE TABLE documents (
-    id         INTEGER PRIMARY KEY AUTOINCREMENT,
-    label      TEXT NOT NULL,
-    text_path  TEXT NOT NULL,
-    created_at TEXT NOT NULL
+    id                INTEGER PRIMARY KEY,
+    original_filename TEXT,
+    display_name      TEXT NOT NULL,
+    text_path         TEXT NOT NULL,
+    created_at        TEXT NOT NULL,
+    doc_uuid          TEXT UNIQUE NOT NULL
 );
 
 CREATE TABLE codes (
@@ -30,7 +32,9 @@ CREATE TABLE coded_segments (
 """
 
 def initialize_database(project_root: Path):
-    """Create project.db with all tables."""
+    """
+    Create project.db with all tables.
+    """
     db_path = Path(project_root) / "project.db"
 
     conn = sqlite3.connect(db_path)

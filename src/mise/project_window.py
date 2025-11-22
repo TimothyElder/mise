@@ -1,7 +1,15 @@
+"""
+project_window.py
+
+Manages the project screen where documents are imported and viewed
+and codes applied.
+"""
+
 from PySide6.QtWidgets import (
     QSplitter, QVBoxLayout, QWidget, QListWidget,
     QTextBrowser, QPushButton, QListWidgetItem,
-    QFileDialog, QMessageBox, QDialog
+    QFileDialog, QMessageBox, QDialog, QMenu,
+    QInputDialog
 )
 
 from PySide6.QtGui import (
@@ -18,6 +26,10 @@ from .code_manager import CodeManager
 from .code_picker import CodePickerDialog
 
 ASSETS_DIR = Path(__file__).resolve().parent / "assets"
+
+# for cursor info
+DOC_ID_ROLE = Qt.UserRole + 1
+PATH_ROLE = Qt.UserRole + 2
 
 def asset_path(name: str) -> str:
     return str(ASSETS_DIR / name)
@@ -40,9 +52,7 @@ class ProjectWidget(QWidget):
         self.db_path = self.project_root / "project.db"
         self.repo = ProjectRepository(self.db_path)
 
-
         main_layout = QVBoxLayout(self)
-
 
         splitter = QSplitter(self)
         main_layout.addWidget(splitter)
@@ -60,6 +70,10 @@ class ProjectWidget(QWidget):
         self.populate_file_list(self.current_path)
         left_layout.addWidget(self.file_list)
 
+        # context menu for file list
+        self.file_list.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.file_list.customContextMenuRequested.connect(self.open_file_context_menu)
+
         splitter.addWidget(left_widget)
 
         self.upload_button = QPushButton("Upload")
@@ -71,6 +85,7 @@ class ProjectWidget(QWidget):
         self.document_viewer.setText("Select a document to view its content.")
         splitter.addWidget(self.document_viewer)
 
+        # context menu for document viewer
         self.document_viewer.setContextMenuPolicy(Qt.CustomContextMenu)
         self.document_viewer.customContextMenuRequested.connect(self.open_text_context_menu)
 
@@ -108,35 +123,56 @@ class ProjectWidget(QWidget):
                 key=lambda p: (not p.is_dir(), p.name.lower())
             )
             for child in children:
-                list_item = QListWidgetItem(child.name)
                 if child.is_dir():
-                    list_item.setIcon(folder_icon)
+                    label = child.name
+                    icon = folder_icon
                 else:
+                    doc = self.repo.get_document_by_text_path(child)
+
+                    if doc is not None:
+                        label = doc["display_name"]
+                        doc_id = doc["id"]
+                    else:
+                        label = child.name
+                        doc_id = None
+
+                    list_item = QListWidgetItem(label)
                     list_item.setIcon(file_icon)
+                    list_item.setData(PATH_ROLE, str(child))
+                    list_item.setData(DOC_ID_ROLE, doc_id)
+                    
+                    icon = file_icon
 
-                # Store full path on the item for later use
-                list_item.setData(Qt.UserRole, str(child))
-
+                list_item = QListWidgetItem(label)
+                list_item.setIcon(icon)
+                
+                list_item.setData(PATH_ROLE, str(child)) # store the document ID instead of the file path
+                list_item.setData(DOC_ID_ROLE, doc_id) # store text path
                 self.file_list.addItem(list_item)
         except Exception as e:
             print(f"Error accessing directory {self.current_path}: {e}")
 
 
     def handle_item_click(self, item):
-        full_path = Path(item.data(Qt.UserRole))
+        path_str = item.data(PATH_ROLE)
 
+        if not path_str:
+            return  # Prevent None errors
 
-        if full_path.is_dir():
-            self.current_path = full_path
+        path_str = Path(path_str)
+
+        if path_str.is_dir():
+            self.current_path = path_str
             self.populate_file_list(self.current_path)
         else:
-            doc_id = self.repo.lookup_document_id(full_path)
+            doc_id = self.repo.lookup_document_id(path_str)
+
             if doc_id is None:
-                print(f"[WARN] File not registered in documents: {full_path}")
+                print(f"[WARN] File not registered in documents: {path_str}")
             self.current_document_id = doc_id
             print(f"doc_id from click is {doc_id}" )
 
-            self.display_file_content(full_path)
+            self.display_file_content(path_str)
 
         self.refresh_highlights()
 
@@ -198,10 +234,41 @@ class ProjectWidget(QWidget):
         if hasattr(self, "repo"):
             self.repo.close()
         super().closeEvent(event)
+
+    def open_file_context_menu(self, pos):
+        """
+        File list context menu for deleting and renaming files.
+        """
+            # pos is in file_list's coordinate system
+        item = self.file_list.itemAt(pos)
+        if item is None:
+            return  # right-clicked on empty space, ignore or show generic menu
+        
+        doc_id = item.data(DOC_ID_ROLE)
+        if doc_id is None:
+            return  # not a registered document
+
+        menu = QMenu(self)
+
+        open_action = menu.addAction("Open Document in Memo View")
+        # assign.triggered.connect(self.open_document_in_memo_view)
+        rename_action = menu.addAction("Rename")
+        remove_action = menu.addAction("Remove from project")
+        
+        action = menu.exec(self.file_list.mapToGlobal(pos))
+
+        if action == open_action:
+            # stub
+            raise ValueError("Document open is not yet implemented.")
+        elif action == rename_action:
+            self.rename_document(item, doc_id)
+        elif action == remove_action:
+            self.delete_document_from_ui(item, doc_id)
     
     def open_text_context_menu(self, pos):
         """
-        Adds assign code functionally on right click in document viewer
+        Adds assign and delete code segments functionally on
+        right click in document viewer.
         """
         cursor = self.document_viewer.cursorForPosition(pos)
         char_pos = cursor.position()
@@ -229,6 +296,51 @@ class ProjectWidget(QWidget):
     def delete_segment_and_refresh(self, segment_id):
         self.repo.delete_segment(segment_id)
         self.refresh_highlights()
+    
+    def rename_document(self, item: QListWidgetItem, doc_id: int):
+        current_name = item.text()
+
+        new_name, ok = QInputDialog.getText(
+            self,
+            "Rename document",
+            "New name:",
+            text=current_name,
+        )
+        if not ok:
+            return
+
+        new_name = new_name.strip()
+        if not new_name or new_name == current_name:
+            return
+
+        rows = self.repo.rename_document_db(new_name, doc_id)
+        if rows:
+            item.setText(new_name)
+
+    def delete_document_from_ui(self, item, doc_id: int):
+        rows, text_path = self.repo.delete_document(doc_id)
+        print(f"[UI] repo deleted {rows} document(s) for id={doc_id}, path={text_path!r}")
+
+        if rows:
+            # 1) Remove file from disk
+            if text_path:
+                try:
+                    Path(text_path).unlink(missing_ok=True)
+                except Exception as e:
+                    print(f"[WARN] Failed to delete file {text_path}: {e}")
+
+            # 2) Remove the item from the list
+            row_index = self.file_list.row(item)
+            self.file_list.takeItem(row_index)
+
+            # optional: refresh highlights, clear current_document_id if needed
+            if self.current_document_id == doc_id:
+                self.current_document_id = None
+                self.document_viewer.clear()
+                self.refresh_highlights()
+        else:
+            print(f"[WARN] No document deleted for id {doc_id}")
+        
 
     def assign_code_to_selection(self):
         """

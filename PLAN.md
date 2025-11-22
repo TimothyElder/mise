@@ -1,6 +1,26 @@
-# Plan
+# Mise Architecture Overview
 
-Deleting Codes from document
+## Goals
+- Minimalist QDA tool: import text, code data, export coded segments.
+
+## Core Concepts
+- Project = folder with SQLite DB + data directories
+- Documents = internal IDs + user-facing names
+- Codes = hierarchical tree
+- Coded segments = ranges stored as (doc_id, start, end)
+
+## Layers
+- UI (PySide): Widgets, dialogs, views
+- Application logic: CodeManager, ProjectRepository
+- Storage: SQLite schema
+
+## Key Decisions
+- Integer IDs for internal FK stability
+- UUIDs for export/import durability
+- All project data lives under `<project_root>`
+- The file list in the project view (`ProjectWidget`) right now is file system driven rather than driven by the databse. A future development is to switch over to a database driven system for displaying files in the project view.
+
+
 
 A minimally working piece of software will require the following features:
 
@@ -40,16 +60,12 @@ For storing data we are going to use SQL with three core tables
 
 ```SQL
 CREATE TABLE documents (
-    id              INTEGER PRIMARY KEY AUTOINCREMENT,
-    uuid            TEXT NOT NULL UNIQUE, -- stable ID if you export/import
-    label           TEXT NOT NULL,        -- user-facing name
-    original_name   TEXT NOT NULL,        -- e.g. "transcript.docx"
-    original_path   TEXT,                 -- where it came from (optional)
-    text_path       TEXT NOT NULL,        -- e.g. "texts/doc_0001.txt"
-    mime_type       TEXT,                 -- e.g. "application/vnd.openxmlformats..."
-    checksum        TEXT,                 -- hash of canonical text
-    created_at      TEXT NOT NULL,
-    updated_at      TEXT NOT NULL
+    id                INTEGER PRIMARY KEY,
+    original_filename TEXT,          -- immutable, optional
+    display_name      TEXT NOT NULL, -- user-facing, editable
+    text_path         TEXT NOT NULL, -- internal project path
+    created_at        TEXT NOT NULL,
+    doc_uuid          TEXT UNIQUE NOT NULL
 );
 ```
 
@@ -81,17 +97,13 @@ CREATE TABLE coded_segments (
 );
 ```
 
-
-
-
-
-
-
-
 # `todo`
-
+- Need to reorganize how the codes appear in the drop down in the assign code dialog so that childtags appear immediately below parent in the drop down.
+- need to clean up the implementation of `extract_text_from_pdf` in `src/mise/utils/file_io.py`.
 - add PDF reading and conversion to `mise/utils/file_io.py` with function `read_pdf`
 - code_manager.py "right click" → "edit code" → dialog edit code 
 - Eventually, need to get a pyinstaller instance installed.
-
+- For ProjectWindow, need to create functionality for deleting documents, renaming, and something else.
+- Need to get the UI options set up, including increasing font size.
+- Memoing feature, perhaps in the AnalysisWidget, and in the ProjectWidget maybe when in the document tree, a right click allows an option to open document in memo mode which allows for a two panel window where on the left is the document and on the right a text editor where you can memo.
 - For analysis widget, should include an option that automatically adds to the segment which is to say expands the text selection from the document to include more context. And need some function to pull up the document from a segment.

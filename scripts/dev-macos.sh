@@ -12,3 +12,7 @@ pip install -e ".[dev]"
 
 # Run app
 mise
+
+conda activate mise
+cd /Users/timothyelder/Documents/mise
+python -m mise

@@ -3,12 +3,15 @@ import csv
 import json
 from docx import Document as DocxDocument
 import markdown
-import pickle
 
 from pathlib import Path
 import pdfplumber
 
 def convert_to_canonical_text(src_path: Path) -> str:
+    """
+    Convert source document, uploaded by the user,
+    to the canonical plaintext format. Returns plain text.
+    """
     ext = src_path.suffix.lower()
 
     if ext == ".pdf":
@@ -23,7 +26,9 @@ def convert_to_canonical_text(src_path: Path) -> str:
         raise ValueError(f"Unsupported extension: {ext}")
 
 def extract_text_from_pdf(path: Path) -> str:
-    # Very basic implementation
+    """
+    Extract text from PDF document and return as plaintext.
+    """
     chunks = []
     with pdfplumber.open(str(path)) as pdf:
         for page in pdf.pages:
@@ -33,6 +38,9 @@ def extract_text_from_pdf(path: Path) -> str:
     return "\n\n".join(chunks).replace("\r\n", "\n").replace("\r", "\n")
 
 def extract_text_from_docx(path: Path) -> str:
+    """
+    Extract text from Docx document and return as plaintext.
+    """
     doc = DocxDocument(str(path))
     paragraphs = [p.text for p in doc.paragraphs]
     text = "\n\n".join(paragraphs)
@@ -47,7 +55,9 @@ def extract_text_from_markdown(path: Path) -> str:
     return text.replace("\r\n", "\n").replace("\r", "\n")
 
 def read_docx(filepath):
-    """Reads a DOCX file and returns its text content."""
+    """
+    Reads a DOCX file and returns its text content.
+    """
     doc = DocxDocument(filepath)
     return "\n".join([p.text for p in doc.paragraphs])
 
