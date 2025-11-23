@@ -14,8 +14,8 @@ from pathlib import Path
 
 from mise.utils.import_service import import_files
 from mise.utils.project_repository import ProjectRepository
-from mise.code_manager import CodeManager
-from mise.code_picker import CodePickerDialog
+from mise.projectview.code_manager import CodeManager
+from mise.projectview.code_picker import CodePickerDialog
 
 # write analysis helper scripts in the /analysis directory and make them accessible above including:
 #   - tokenize text

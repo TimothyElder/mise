@@ -1,5 +1,24 @@
 # Mise Architecture Overview
 
+## Versioning
+
+I think that creating a versioning tool will be helpful but this will require adding some functionality and changing the underlying logic of how things are designed. A project could look something like this:
+
+```sh
+my-project/
+  texts/
+    001_interview_daniel.txt
+    002_fieldnotes_icu.txt
+  metadata/
+    documents.csv          # doc_id, filename, participant, etc.
+    codes.yaml             # hierarchical code tree
+    segments.csv           # doc_id, code_id, start, end, memo_id
+    memos/
+      2025-11-22_clinical-ambiguity.md
+  project.db               # local cache/index
+  ```
+  This would allow 
+
 ## Goals
 - Minimalist QDA tool: import text, code data, export coded segments.
 

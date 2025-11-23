@@ -4,7 +4,7 @@ from PySide6.QtWidgets import (
 
 from PySide6.QtCore import QDir
 
-from project_window import ProjectWidget
+from mise.projectview.project_window import ProjectWidget
 from project_init import create_project
 
 class CreateProjectDialog(QDialog):
