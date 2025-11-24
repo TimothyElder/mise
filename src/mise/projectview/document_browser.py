@@ -1,33 +1,3 @@
-"""
-Browser's job: detect clicks and emit high-level events.
-It should not load files or know about the viewer at all.
-
-Responsibility: everything to do with the left-hand side file/document list.
-
-Move these into it:
-    - State:
-        - texts_dir
-        - current_path
-    - UI:
-        - back_button
-        - file_list
-        - upload_button
-    - Methods:
-        - populate_file_list
-        - go_back
-        - handle_upload_clicked
-        - open_file_context_menu
-        - rename_document (UI piece only)
-        - delete_document_from_ui (or better: emit signals and let ProjectWidget call repo)
-
-And crucially, stop having this widget touch the repository directly where possible. Instead, give it a reference to a small interface:
-    - Or inject ProjectRepository but restrict what it does.
-        - Or, better, have it emit signals:
-            - documentSelected(doc_id: int, path: Path)
-            - documentRenamed(doc_id: int, new_name: str)
-            - documentDeleted(doc_id: int)
-"""
-
 from PySide6.QtWidgets import (
     QVBoxLayout, QWidget, QListWidget,
     QPushButton, QListWidgetItem,  QWidget,
@@ -101,7 +71,6 @@ class DocumentBrowserWidget(QWidget):
         Refactor to use doc_id so it is managed by the database? 
         """
         
-
         path = item.data(PATH_ROLE)
 
         if not path:
@@ -286,10 +255,5 @@ class DocumentBrowserWidget(QWidget):
             # Emit signal that document deleted
             self.documentDeleted.emit(doc_id, text_path or "")
 
-            # optional: refresh highlights, clear current_document_id if needed
-            if self.current_document_id == doc_id:
-                self.current_document_id = None
-                self.document_viewer.clear()
-                self.refresh_highlights()
         else:
             print(f"[WARN] No document deleted for id {doc_id}")

@@ -1,23 +1,17 @@
-from PySide6.QtWidgets import (
-    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
-    QFileDialog, QInputDialog, QMessageBox
-)
-from PySide6.QtGui import QPixmap
-from PySide6.QtCore import Qt, QDir
-
 from pathlib import Path
-
-from .projectview.project_window import ProjectWidget
-from .project_init import create_project
-from .analysisview.analysis_window import AnalysisWidget
-
 import logging
 log = logging.getLogger(__name__)
 
-ASSETS_DIR = Path(__file__).resolve().parent / "assets"
+from PySide6.QtWidgets import (
+    QMainWindow, QFileDialog, QInputDialog, QMessageBox
+)
+from PySide6.QtCore import QDir
 
-def asset_path(name: str) -> str:
-    return str(ASSETS_DIR / name)
+from .utils.project_repository import ProjectRepository
+from .projectview.project_window import ProjectView
+from .project_init import create_project
+from .analysisview.analysis_window import AnalysisWindow
+from .widgets.welcome_widget import WelcomeWidget
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -29,23 +23,23 @@ class MainWindow(QMainWindow):
         self._create_menu_bar()
 
         # Set up the welcome widget
-        welcome = WelcomeWidget(on_new_project=self.create_new_project, on_open_project=self.open_project)
+        welcome = WelcomeWidget()
+        welcome.new_project_requested.connect(self._handle_create_new_project_requested)
+        welcome.open_project_requested.connect(self._handle_open_project_requested)
         self.setCentralWidget(welcome)
 
     def _create_menu_bar(self):
 
-        print("creating menu bar")
         menu_bar = self.menuBar()
         self.setMenuBar(menu_bar)
-        
-        # You can add additional menu options later
+
         file_menu = menu_bar.addMenu("File")
         
         new_project = file_menu.addAction("Create New Project")
-        new_project.triggered.connect(self.create_new_project)
+        new_project.triggered.connect(self._handle_create_new_project_requested)
 
         open_project = file_menu.addAction("Open Project")
-        open_project.triggered.connect(self.open_project)
+        open_project.triggered.connect(self._handle_open_project_requested)
 
         help_menu = menu_bar.addMenu("Help")
         thing = help_menu.addAction("Some Help")
@@ -53,15 +47,21 @@ class MainWindow(QMainWindow):
 
         view_menu = menu_bar.addMenu("View")
         switch_to_analysis = view_menu.addAction("Open Analysis")
-        switch_to_analysis.triggered.connect(self.open_analysis)
+        switch_to_analysis.triggered.connect(self._handle_open_analysis_requested)
         about_mise = view_menu.addAction("About Mise")
-        about_mise.triggered.connect(self.show_about_dialog)
+        about_mise.triggered.connect(self._handle_show_about_dialog)
 
-    def open_analysis(self):
-        analysis = AnalysisWidget()
-        self.setCentralWidget(analysis)
+    def _handle_open_analysis_requested(self):
+        """
+        Open Analyis window
+        """
+        
+        if not hasattr(self, "_analysis_view"):
+            self._analysis_view = AnalysisWindow()
 
-    def create_new_project(self):
+        self.setCentralWidget(self._analysis_view)
+
+    def _handle_create_new_project_requested(self):
         """
         Calls function that creates project, using user defined project
         from file dialog box and sepcified project name.
@@ -84,14 +84,21 @@ class MainWindow(QMainWindow):
         try:
             project_root = create_project(project_name, dirpath)
             QMessageBox.information(self, "Success", f"Project '{project_name}' created successfully.")
-            project = ProjectWidget(project_name, project_root)
+            log.info("Project %s created at %r.", project_name, project_root)
+            db_path = project_root / "project.db"
+            repo = ProjectRepository(db_path)
+            project = ProjectView(project_name, project_root, repo)
             self.setCentralWidget(project)
 
         except Exception as e:
             QMessageBox.critical(self, "Error", str(e))
+            log.error("Error creating project named %s at %r: %s", project_name, dirpath, e)
 
-    def open_project(self):
-        # Let the user pick the *project root* (the .mise folder)
+    def _handle_open_project_requested(self):
+        """
+        Open existing project from file dialog 
+        """
+        
         dirpath_str = QFileDialog.getExistingDirectory(
             self,
             "Select Mise Project Directory",
@@ -122,11 +129,14 @@ class MainWindow(QMainWindow):
         if project_name.endswith(".mise"):
             project_name = project_name[:-5]
 
-        # Swap the central widget to a ProjectWidget
-        project = ProjectWidget(project_name, project_root)
+        db_path = project_root / "project.db"
+        repo = ProjectRepository(db_path)
+
+        # Swap the central widget to a ProjectView
+        project = ProjectView(project_name, project_root, repo)
         self.setCentralWidget(project)
 
-    def show_about_dialog(self):
+    def _handle_show_about_dialog(self):
         QMessageBox.about(
             self,
             "About Mise",
@@ -135,56 +145,3 @@ class MainWindow(QMainWindow):
             "Version 0.0.1<br>"
             "<a href='https://miseqda.com'>miseqda.com</a>"
         )
-
-class WelcomeWidget(QWidget):
-    def __init__(self, on_new_project, on_open_project, parent=None):
-        super().__init__(parent)
-        
-        self.on_new_project = on_new_project
-        self.on_open_project = on_open_project
-
-        # Set up layout
-        layout = QHBoxLayout(self)
-
-        # Left side: buttons for "Create New Project" and "Open Project"
-        button_layout = QVBoxLayout()
-        create_button = QPushButton("Create New Project")
-        create_button.clicked.connect(self.on_new_project)
-        open_button = QPushButton("Open Project")
-        button_layout.addWidget(create_button)
-        button_layout.addWidget(open_button)
-        open_button.clicked.connect(self.on_open_project)
-        button_layout.setAlignment(Qt.AlignCenter)
-        layout.addLayout(button_layout)
-
-        # Right side: logo and description
-        logo_layout = QVBoxLayout()
-        # Load the logo image
-        logo_label = QLabel()
-        pixmap = QPixmap(asset_path("mise.png")).scaled(500, 500, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        logo_label.setPixmap(pixmap)
-        logo_label.setAlignment(Qt.AlignCenter)
-
-        # Add the logo to the layout
-        layout.addWidget(logo_label)
-        logo_label.setAlignment(Qt.AlignCenter)
-
-        description_label = QLabel()
-        description_label.setText(
-            """<p style="font-size: 14px; color: grey;">Mise ("<em>meez</em>") is an qualitative data analysis tool designed to place good principles at the heart of software.</p>
-               <p>There are a few principles that guide this software:</p>
-               <ul>
-                    <li>Codes should be applied to large chunks of text</li>
-                    <li>Everything should be accessible to the analyst</li>
-                    <li>Anlaysis should be made as transparent as possible</li>
-               </ul>
-
-                <p>Suggestions or bugs can be reported to <a href='mailto:timothy.b.elder@dartmouth.edu'>timothy.b.elder@dartmouth.edu</a></p>
-
-                <p><a href='https://miseqda.com'>miseqda.com</a></p>
-            """)
-        description_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-        description_label.setWordWrap(True)
-
-        logo_layout.addWidget(description_label)
-        layout.addLayout(logo_layout)

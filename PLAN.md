@@ -167,6 +167,7 @@ Advanced users may want to have the option to script functionality in Mise as we
 - Alembic versioning style with published schema for database
 - On project creation need to add something in the root directory for the project that clearly indicates that the directory is a project file such as including a `.mise` file that has some information about under what version of the program the project was made and the author.
 - For packaging the app need to set `setup_logging(..., level=logging.INFO)` in the `app.py` file.
+- extract project creation flow into helper method `_handle_create_new_project_requested`, because UI ↔ filesystem ↔ repo should not live in one function
 
 ### Proposed Order of Development
 

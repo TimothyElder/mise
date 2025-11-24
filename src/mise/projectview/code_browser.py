@@ -11,12 +11,12 @@ from ..utils.project_repository import ProjectRepository
 import logging
 log = logging.getLogger(__name__)
 
-class CodeManager(QWidget):
+class CodeBrowserWidget(QWidget):
     codes_updated = Signal()
     code_added = Signal(int)        # new_code_id
     code_deleted = Signal(int)      # code_id
     code_edited = Signal(int)       # code_id
-    code_selected = Signal(int)
+    code_selected = Signal(int)     # code_id
 
     def __init__(self, repo: ProjectRepository, parent=None):
         super().__init__(parent)
@@ -169,7 +169,7 @@ class CodeManager(QWidget):
         global_pos = self.tree.viewport().mapToGlobal(pos)
         menu.exec(global_pos)
 
-    def _on_delete_code_requested(self, code_id):
+    def _on_delete_code_requested(self, code_id: int):
         """
         Send delete request to ProjectRepository
         """

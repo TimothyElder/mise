@@ -26,7 +26,7 @@ from mise.utils.project_repository import ProjectRepository
 #   - network functions
 #   - word cloud
 
-class AnalysisWidget(QWidget):
+class AnalysisWindow(QWidget):
     def __init__(self, project_name, project_root):
         super().__init__()
 

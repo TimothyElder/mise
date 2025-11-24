@@ -1,17 +1,6 @@
-
-"""
-Responsibility: the center QTextBrowser and all coding-related interaction.
-
-Move these into it:
-    •    self.document_viewer (wrap it or subclass)
-    •    current_document_id should live here (or at least be “owned” here).
-    •    Methods:
-    •    display_file_content
-    •    open_text_context_menu
-    •    assign_code_to_selection
-    •    delete_segment_and_refresh
-    •    refresh_highlights
-"""
+import logging
+log = logging.getLogger(__name__)
+from pathlib import Path
 
 from PySide6.QtWidgets import (
     QVBoxLayout, QWidget,
@@ -24,13 +13,8 @@ from PySide6.QtGui import (
 
 from PySide6.QtCore import Qt, Signal
 
-from pathlib import Path
-
 from ..utils.project_repository import ProjectRepository
 from .code_picker import CodePickerDialog
-
-import logging
-log = logging.getLogger(__name__)
 
 class DocumentViewerWidget(QWidget):
     documentChanged = Signal(int)            # maybe
@@ -97,6 +81,14 @@ class DocumentViewerWidget(QWidget):
             assign.triggered.connect(self.assign_code_to_selection)
 
         menu.exec(self.document_viewer.mapToGlobal(pos))
+    
+    def clear_document(self):
+        """
+        Clear the viewer and reset current_document_id.
+        """
+        self.current_document_id = None
+        self.document_viewer.clear()
+        self.document_viewer.setText("Select a document to view its content.")
 
     def delete_segment_and_refresh(self, segment_id):
         self.repo.delete_segment(segment_id)
@@ -106,7 +98,7 @@ class DocumentViewerWidget(QWidget):
         """
         Assign code to segment of text
         """
-        print(f"Current document id is {self.current_document_id}")
+        log.debug("Assigning code in document_id=%s", self.current_document_id)
         if self.current_document_id is None:
             return
 
@@ -146,7 +138,7 @@ class DocumentViewerWidget(QWidget):
         cursor.setCharFormat(default_format)
 
         rows = self.repo.get_coded_segments(self.current_document_id)
-        print("refresh_highlights: found", len(rows), "segments")  # keep or drop
+        log.debug("refresh_highlights: found %d segments", len(rows))
 
         for seg in rows:
             fmt = QTextCharFormat()
