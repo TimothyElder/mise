@@ -1,4 +1,4 @@
-# Mise <img src='data/mise.png' align="right" height="138.5" /></a>
+# Mise <img src='src/mise/assets/mise.png' align="right" height="138.5" /></a>
 
 >For the professional, one's meez is an obsession, one's sword and shield, the only thing standing between you and chaos. If you have your meez right, it means you have your head together, you are "set up", stocked, organized, ready with everything you need and are likely to need for the tasks at hand.
 <p align="right"/>Anthony Bourdain, <em>Le Halles Cookbook</em></p>
