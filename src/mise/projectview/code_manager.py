@@ -6,10 +6,10 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor
 
-from .utils.project_repository import ProjectRepository
+from ..utils.project_repository import ProjectRepository
 
 class CodeManager(QWidget):
-    codes_updated = Signal()
+    codes_updated = Signal(bool) 
 
     def __init__(self, repo: ProjectRepository, parent=None):
         super().__init__(parent)
@@ -50,7 +50,7 @@ class CodeManager(QWidget):
             raise ValueError(f"No code found with id={code_id}")
         
         if updated > 0:
-            self.codes_updated.emit()
+            self.codes_updated.emit(True)
             print("SIGNAL EMITED")
 
         return updated
@@ -164,7 +164,7 @@ class CodeManager(QWidget):
         print(f"deleted code ID == {code_id}")
 
         self.refresh()
-        self.codes_updated.emit()
+        self.codes_updated.emit(True)
     
     def _on_edit_code_requested(self, code_id):
 

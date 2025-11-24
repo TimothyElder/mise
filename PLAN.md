@@ -1,5 +1,24 @@
 # Mise Architecture Overview
 
+## Versioning
+
+I think that creating a versioning tool will be helpful but this will require adding some functionality and changing the underlying logic of how things are designed. A project could look something like this:
+
+```sh
+my-project/
+  texts/
+    001_interview_daniel.txt
+    002_fieldnotes_icu.txt
+  metadata/
+    documents.csv          # doc_id, filename, participant, etc.
+    codes.yaml             # hierarchical code tree
+    segments.csv           # doc_id, code_id, start, end, memo_id
+    memos/
+      2025-11-22_clinical-ambiguity.md
+  project.db               # local cache/index
+  ```
+  This would allow 
+
 ## Goals
 - Minimalist QDA tool: import text, code data, export coded segments.
 
@@ -106,3 +125,5 @@ CREATE TABLE coded_segments (
 - Need to get the UI options set up, including increasing font size.
 - Memoing feature, perhaps in the AnalysisWidget, and in the ProjectWidget maybe when in the document tree, a right click allows an option to open document in memo mode which allows for a two panel window where on the left is the document and on the right a text editor where you can memo.
 - For analysis widget, should include an option that automatically adds to the segment which is to say expands the text selection from the document to include more context. And need some function to pull up the document from a segment.
+- Folder icons not appearing in file browser
+- need to set up the database documentation to follow the  Alembic versioning style with published schema

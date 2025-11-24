@@ -7,7 +7,7 @@ from PySide6.QtCore import Qt, QDir
 
 from pathlib import Path
 
-from .project_window import ProjectWidget
+from .projectview.project_window import ProjectWidget
 from .project_init import create_project
 from .analysis.analysis_widget import AnalysisWidget
 
