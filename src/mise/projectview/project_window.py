@@ -26,24 +26,15 @@ Need to Name state consistently and have ProjectWidget control it.
 """
 
 from PySide6.QtWidgets import (
-    QSplitter, QVBoxLayout, QWidget, QListWidget,
-    QTextBrowser, QPushButton, QListWidgetItem,
-    QFileDialog, QMessageBox, QDialog, QMenu,
-    QInputDialog
+    QSplitter, QVBoxLayout, QWidget
 )
-
-from PySide6.QtGui import (
-    QIcon, QTextCursor, QTextCharFormat, 
-    QColor)
 
 from PySide6.QtCore import Qt
 
 from pathlib import Path
 
-from ..utils.import_service import import_files
 from ..utils.project_repository import ProjectRepository
 from .code_manager import CodeManager
-from .code_picker import CodePickerDialog
 from .document_browser import DocumentBrowserWidget
 from .document_viewer import DocumentViewerWidget
 
@@ -78,10 +69,13 @@ class ProjectWidget(QWidget):
     def __init__(self, project_name, project_root):
         super().__init__()
 
-
+        # Config
         self.project_name = project_name
         self.project_root = Path(project_root)
         self.texts_dir = self.project_root / "texts"
+
+        # State
+        self.current_document_id = None
 
        # Open Database connection via repository
         self.db_path = self.project_root / "project.db"
@@ -106,6 +100,7 @@ class ProjectWidget(QWidget):
             }
         """)
 
+
         # Let splitter own the children (no need to pass parent=self here)
         self.file_browser_widget = DocumentBrowserWidget(self.repo, self.texts_dir, self.project_root)
         self.file_viewer_widget = DocumentViewerWidget(self.repo)
@@ -121,7 +116,11 @@ class ProjectWidget(QWidget):
         splitter.setStretchFactor(2, 1)  # codes
         
         self.file_browser_widget.documentActivated.connect(self.on_document_activated)
+        self.file_browser_widget.documentDeleted.connect(self.on_document_deleted)
+        self.file_browser_widget.documentRenamed.connect(self.on_document_renamed)
+        self.file_browser_widget.openInMemoRequested.connect(self.open_memo_view_for_document)
         self.code_manager.codes_updated.connect(self.file_viewer_widget.refresh_highlights)
+        # self.code_manager.code_deleted.connect(self.on_code_deleted)
 
     def debug_state(self):
         """
@@ -131,6 +130,23 @@ class ProjectWidget(QWidget):
         print("Browser:", self.file_browser_widget.current_path)
         print("Project:", self.current_document_id)
         print("Viewer:", self.file_viewer_widget.current_document_id)
+
+    def on_document_deleted(self, doc_id: int, text_path: str):
+        if self.current_document_id == doc_id:
+            self.current_document_id = None
+            self.file_viewer_widget.clear()
+            self.refresh_highlights()
+
+    def open_memo_view_for_document(self):
+        raise ValueError("Memo view Not yet implemented")
+
+    def on_document_renamed(self, new_name: str, doc_id: int):
+        # NO DB CALL HERE
+        if self.current_document_id == doc_id:
+            # e.g. update window title, breadcrumbs, analysis views, etc.
+            self.setWindowTitle(f"Mise – {new_name}")
+            # maybe refresh any other widgets that mirror the doc name
+
         
     def on_document_activated(self, path: Path):
         # Ensure we always work with Path inside

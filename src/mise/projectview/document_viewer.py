@@ -14,14 +14,12 @@ Move these into it:
 """
 
 from PySide6.QtWidgets import (
-    QSplitter, QVBoxLayout, QWidget, QListWidget,
-    QTextBrowser, QPushButton, QListWidgetItem,
-    QFileDialog, QMessageBox, QDialog, QMenu,
-    QInputDialog
+    QVBoxLayout, QWidget,
+    QTextBrowser, QDialog
 )
 
 from PySide6.QtGui import (
-    QIcon, QTextCursor, QTextCharFormat, 
+    QTextCursor, QTextCharFormat, 
     QColor)
 
 from PySide6.QtCore import Qt, Signal

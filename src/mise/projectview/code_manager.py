@@ -9,7 +9,10 @@ from PySide6.QtGui import QColor
 from ..utils.project_repository import ProjectRepository
 
 class CodeManager(QWidget):
-    codes_updated = Signal(bool) 
+    codes_updated = Signal()
+    code_added = Signal(int)        # new_code_id
+    code_deleted = Signal(int)      # code_id
+    code_edited = Signal(int)       # code_id
 
     def __init__(self, repo: ProjectRepository, parent=None):
         super().__init__(parent)
@@ -125,7 +128,7 @@ class CodeManager(QWidget):
             # Minimal guard; you can add a message box if you care
             return
 
-        self.add_code(
+        new_id = self.add_code(
             label=data["label"],
             parent_id=data["parent_id"],
             description=data["description"],
@@ -133,6 +136,8 @@ class CodeManager(QWidget):
         )
 
         self.refresh()
+        self.code_added.emit(new_id)
+        self.codes_updated.emit()
 
     def open_context_menu(self, pos):
         """
@@ -163,8 +168,10 @@ class CodeManager(QWidget):
         self.repo.delete_code(code_id)
         print(f"deleted code ID == {code_id}")
 
+        self.repo.delete_code(code_id)
         self.refresh()
-        self.codes_updated.emit(True)
+        self.code_deleted.emit(code_id)
+        self.codes_updated.emit()
     
     def _on_edit_code_requested(self, code_id):
 
@@ -191,6 +198,8 @@ class CodeManager(QWidget):
         )
 
         self.refresh()
+        self.code_edited.emit(code_id)
+        self.codes_updated.emit()
 
 class CodeDialog(QDialog):
     """

@@ -127,3 +127,4 @@ CREATE TABLE coded_segments (
 - For analysis widget, should include an option that automatically adds to the segment which is to say expands the text selection from the document to include more context. And need some function to pull up the document from a segment.
 - Folder icons not appearing in file browser
 - need to set up the database documentation to follow the  Alembic versioning style with published schema
+- On project creation need to add something in the root directory for the project that clearly indicates that the directory is a project file such as including a `.mise` file that has some information about under what version of the program the project was made and the author.

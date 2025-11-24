@@ -29,15 +29,13 @@ And crucially, stop having this widget touch the repository directly where possi
 """
 
 from PySide6.QtWidgets import (
-    QSplitter, QVBoxLayout, QWidget, QListWidget,
-    QTextBrowser, QPushButton, QListWidgetItem,
-    QFileDialog, QMessageBox, QDialog, QMenu,
-    QInputDialog, QWidget
+    QVBoxLayout, QWidget, QListWidget,
+    QPushButton, QListWidgetItem,  QWidget,
+    QFileDialog, QMessageBox, QMenu, QInputDialog
 )
 
 from PySide6.QtGui import (
-    QIcon, QTextCursor, QTextCharFormat, 
-    QColor)
+    QIcon)
 
 from PySide6.QtCore import Qt, Signal
 
@@ -56,7 +54,11 @@ def asset_path(name: str) -> str:
 
 class DocumentBrowserWidget(QWidget):
     documentActivated = Signal(object)  # path
-    folderActivated = Signal(str)    # path
+    folderActivated = Signal(str)       # path
+
+    documentDeleted = Signal(int, str)    # doc_id, text_path
+    documentRenamed = Signal(int, str)    # doc_id, new_name
+    openInMemoRequested = Signal(int)     # doc_id
 
     def __init__(self, repo, texts_dir: Path, project_root: Path, parent=None):
         super().__init__(parent)
@@ -233,7 +235,7 @@ class DocumentBrowserWidget(QWidget):
 
         if action == open_action:
             # stub
-            raise ValueError("Document open is not yet implemented.")
+            self.openInMemoRequested.emit(doc_id)
         elif action == rename_action:
             self.rename_document(item, doc_id)
         elif action == remove_action:
@@ -258,6 +260,7 @@ class DocumentBrowserWidget(QWidget):
         rows = self.repo.rename_document_db(new_name, doc_id)
         if rows:
             item.setText(new_name)
+            self.documentRenamed.emit(doc_id, new_name)
 
     def delete_document_from_ui(self, item, doc_id: int):
         rows, text_path = self.repo.delete_document(doc_id)
@@ -274,6 +277,9 @@ class DocumentBrowserWidget(QWidget):
             # 2) Remove the item from the list
             row_index = self.file_list.row(item)
             self.file_list.takeItem(row_index)
+
+            # Emit signal that document deleted
+            self.documentDeleted.emit(doc_id, text_path or "")
 
             # optional: refresh highlights, clear current_document_id if needed
             if self.current_document_id == doc_id:

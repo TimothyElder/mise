@@ -9,7 +9,7 @@ from pathlib import Path
 
 from .projectview.project_window import ProjectWidget
 from .project_init import create_project
-from .analysis.analysis_widget import AnalysisWidget
+from .analysisview.analysis_window import AnalysisWidget
 
 ASSETS_DIR = Path(__file__).resolve().parent / "assets"
 
