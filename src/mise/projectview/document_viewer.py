@@ -1,3 +1,4 @@
+
 """
 Responsibility: the center QTextBrowser and all coding-related interaction.
 
@@ -31,32 +32,42 @@ from ..utils.project_repository import ProjectRepository
 from .code_picker import CodePickerDialog
 
 class DocumentViewerWidget(QWidget):
-    documentChanged = Signal(int)  # maybe
+    documentChanged = Signal(int)            # maybe
     segmentAssigned = Signal(int, int, int)  # doc_id, start, end
-    segmentDeleted = Signal(int)  # segment_id
+    segmentDeleted = Signal(int)             # segment_id
 
     def __init__(self, repo: ProjectRepository, parent=None):
         super().__init__(parent)
         
+        # Config
+        self.repo = repo
+
+        # State
+        self.current_document_id = None
+
+        # UI
+        layout = QVBoxLayout(self)
+
         self.document_viewer = QTextBrowser()
         self.document_viewer.setText("Select a document to view its content.")
+        layout.addWidget(self.document_viewer)
 
         # context menu for document viewer
         self.document_viewer.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.document_viewer.customContextMenuRequested.connect(self.open_text_context_menu)
+        self.document_viewer.customContextMenuRequested.connect(
+            self.open_text_context_menu
+        )
 
-    def display_file_content(self, path_str: str):
+    def display_file_content(self, path: Path):
         """
         Display the content of the selected file in the document viewer.
-
-        Need to refactor this look up path by doc_id so DB is handling it
         """
         try:
-            with open(path_str, "r") as f:
-                content = f.read()
-            self.document_viewer.setPlainText(content)  # Show content in plain text
+            # Use Path’s own API, not bare open(path, "r")
+            content = path.read_text(encoding="utf-8")
+            self.document_viewer.setPlainText(content)
         except Exception as e:
-            self.document_viewer.setPlainText(f"Error reading file {path_str}: {e}")
+            self.document_viewer.setPlainText(f"Error reading file {path}: {e}")
         
     def open_text_context_menu(self, pos):
         """
@@ -94,6 +105,7 @@ class DocumentViewerWidget(QWidget):
         """
         Assign code to segment of text
         """
+        print(f"Current document id is {self.current_document_id}")
         if self.current_document_id is None:
             return
 
@@ -106,6 +118,7 @@ class DocumentViewerWidget(QWidget):
             return
 
         code_id = dialog.get_code_id()
+        
         if code_id is None:
             return
 

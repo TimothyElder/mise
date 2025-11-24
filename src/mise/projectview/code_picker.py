@@ -1,65 +1,68 @@
 from PySide6.QtWidgets import (
-    QDialog, QVBoxLayout, QFormLayout, QComboBox, QDialogButtonBox, QLabel
+    QDialog, QVBoxLayout, QDialogButtonBox, QTreeWidget, QTreeWidgetItem
 )
 from PySide6.QtCore import Qt
-
 
 class CodePickerDialog(QDialog):
     """
     Dialog for choosing an existing code to assign to a text selection.
     Reads codes from the `codes` table via the given DB connection.
     """
-
     def __init__(self, conn, parent=None):
         super().__init__(parent)
         self.conn = conn
+        self._selected_code_id = None
 
         self.setWindowTitle("Assign Code")
-        self._init_ui()
-        self._load_codes()
 
-    def _init_ui(self):
         layout = QVBoxLayout(self)
 
-        info = QLabel("Choose a code to assign to the selected text:")
-        layout.addWidget(info)
+        self.tree = QTreeWidget()
+        self.tree.setHeaderHidden(True)  # just show labels
+        layout.addWidget(self.tree)
 
-        form = QFormLayout()
-        self.code_combo = QComboBox()
-        form.addRow("Code:", self.code_combo)
-        layout.addLayout(form)
-
-        buttons = QDialogButtonBox(
-            QDialogButtonBox.Ok | QDialogButtonBox.Cancel,
-            orientation=Qt.Horizontal,
-            parent=self
-        )
+        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
 
-    def _load_codes(self):
-        self.code_combo.clear()
+        self.populate_codes()
 
-        rows = self.conn.execute(
-            "SELECT id, label, parent_id FROM codes ORDER BY sort_order, label"
-        ).fetchall()
+    def list_codes(self):
+        cur = self.conn.execute(
+            "SELECT id, label, parent_id, color FROM codes ORDER BY label COLLATE NOCASE"
+        )
+        cols = [c[0] for c in cur.description]
+        return [dict(zip(cols, row)) for row in cur.fetchall()]
 
-        for row in rows:
-            label = row["label"]
-            if row["parent_id"] is not None:
-                display_text = f"  {label}"
+    def populate_codes(self):
+        self.tree.clear()
+
+        codes = self.list_codes()
+        if not codes:
+            return
+
+        items_by_id = {}
+
+        # Create items
+        for code in codes:
+            item = QTreeWidgetItem([code["label"]])
+            item.setData(0, Qt.UserRole, code["id"])
+            items_by_id[code["id"]] = item
+
+        # Wire parent/child
+        for code in codes:
+            item = items_by_id[code["id"]]
+            parent_id = code["parent_id"]
+            if parent_id and parent_id in items_by_id:
+                items_by_id[parent_id].addChild(item)
             else:
-                display_text = label
+                self.tree.addTopLevelItem(item)
 
-            self.code_combo.addItem(display_text, row["id"])
-
-        if self.code_combo.count() == 0:
-            self.code_combo.addItem("(No codes defined)", None)
+        self.tree.expandAll()
 
     def get_code_id(self):
-        """
-        Return the selected code's ID (from codes.id), or None.
-        Call this only after exec() returns QDialog.Accepted.
-        """
-        return self.code_combo.currentData()
+        item = self.tree.currentItem()
+        if not item:
+            return None
+        return item.data(0, Qt.UserRole)

@@ -17,6 +17,12 @@ The only methods that should remain here are:
 	- A few small glue handlers (like “when doc changes, update viewer & highlights”).
 
 Right now you're putting all logic in here, and it's not sustainable.
+
+Need to Name state consistently and have ProjectWidget control it. 
+	- current_document_id
+	- current_path
+	- current_segment_id (if needed)
+	- current_code_id (if ever needed)
 """
 
 from PySide6.QtWidgets import (
@@ -81,33 +87,68 @@ class ProjectWidget(QWidget):
         self.db_path = self.project_root / "project.db"
         self.repo = ProjectRepository(self.db_path)
 
-        main_layout = QVBoxLayout(self)
+        splitter = QSplitter(Qt.Horizontal, self)  # be explicit
 
-        splitter = QSplitter(self)
+        # Margins: let the splitter use full space
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.addWidget(splitter)
 
-        # Left: File browser
-        self.file_browser_widget = DocumentBrowserWidget(self.repo, self.texts_dir, self.project_root, parent=self)
+                # Make the handle thicker and visually distinct
+        splitter.setHandleWidth(6)
+        splitter.setStyleSheet("""
+            QSplitter::handle {
+                background-color: #dddddd;
+            }
+            QSplitter::handle:horizontal {
+                margin: 0px;
+                cursor: splitHCursor;  /* left-right arrows */
+            }
+        """)
 
-        self.file_browser_widget.documentActivated.connect(self.on_document_activated)
+        # Let splitter own the children (no need to pass parent=self here)
+        self.file_browser_widget = DocumentBrowserWidget(self.repo, self.texts_dir, self.project_root)
+        self.file_viewer_widget = DocumentViewerWidget(self.repo)
+        self.code_manager = CodeManager(repo=self.repo)
+
         splitter.addWidget(self.file_browser_widget)
-
-        # Center: Document viewer
-        self.file_viewer_widget = DocumentViewerWidget(self.repo, parent=self)
-        
         splitter.addWidget(self.file_viewer_widget)
-
-        # Right: Code manager
-        self.code_manager = CodeManager(
-            repo=self.repo,
-            parent=self
-        )
         splitter.addWidget(self.code_manager)
-        self.code_manager.codes_updated.connect(self.file_viewer_widget.refresh_highlights)
-        splitter.setSizes([200, 600, 400])
 
-    def on_document_activated(self, doc_id):
-        self.file_viewer_widget.display_file_content(doc_id)
+        # Optional: stretch factors instead of magic sizes
+        splitter.setStretchFactor(0, 1)  # browser
+        splitter.setStretchFactor(1, 2)  # viewer
+        splitter.setStretchFactor(2, 1)  # codes
+        
+        self.file_browser_widget.documentActivated.connect(self.on_document_activated)
+        self.code_manager.codes_updated.connect(self.file_viewer_widget.refresh_highlights)
+
+    def debug_state(self):
+        """
+        debug sentinel
+        """
+
+        print("Browser:", self.file_browser_widget.current_path)
+        print("Project:", self.current_document_id)
+        print("Viewer:", self.file_viewer_widget.current_document_id)
+        
+    def on_document_activated(self, path: Path):
+        # Ensure we always work with Path inside
+        path = Path(path)
+
+        # Look up document id for this path
+        doc_id = self.repo.lookup_document_id(path)
+        if doc_id is None:
+            print(f"[WARN] No document id for path {path}")
+        else:
+            print(f"[INFO] Activated document id {doc_id} for {path}")
+
+        # Push state into the viewer
+        self.file_viewer_widget.current_document_id = doc_id
+
+        # Show content and refresh highlights for that doc
+        self.file_viewer_widget.display_file_content(path)
+        self.file_viewer_widget.refresh_highlights()
     
     def closeEvent(self, event):
         """

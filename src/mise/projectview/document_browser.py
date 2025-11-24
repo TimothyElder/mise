@@ -55,8 +55,8 @@ def asset_path(name: str) -> str:
     return str(ASSETS_DIR / name)
 
 class DocumentBrowserWidget(QWidget):
-    documentActivated = Signal(str)  # path_str
-    folderActivated = Signal(str)    # path_str
+    documentActivated = Signal(object)  # path
+    folderActivated = Signal(str)    # path
 
     def __init__(self, repo, texts_dir: Path, project_root: Path, parent=None):
         super().__init__(parent)
@@ -96,38 +96,31 @@ class DocumentBrowserWidget(QWidget):
         Refactor to use doc_id so it is managed by the database? 
         """
 
-        path_str = item.data(PATH_ROLE)
+        path = item.data(PATH_ROLE)
 
-        if not path_str:
+        if not path:
             return  # Prevent None errors
 
-        path_str = Path(path_str)
+        path = Path(path)
 
 		# IF DIRECTORY
-        if path_str.is_dir():
-            self.current_path = path_str
+        if path.is_dir():
+            self.current_path = path
             self.populate_file_list(self.current_path)
         # OTHERWISE IT IS FILE
         else:
-            doc_id = self.repo.lookup_document_id(path_str)
+            doc_id = self.repo.lookup_document_id(path)
             
             if doc_id is None:
-                print(f"[WARN] File not registered in documents: {path_str}")
+                print(f"[WARN] File not registered in documents: {path}")
             
             self.current_document_id = doc_id
             
             print(f"doc_id from click is {doc_id}" )
+            print(f"path to document from click is {path}" )
             
-            self.documentActivated.emit(path_str)
-
-            # Now in ProjectWidget need to 
+            self.documentActivated.emit(path)
             
-			
-            
-
-
-
-
     def populate_file_list(self, directory: Path):
         """
         Populate the QListWidget with directories and files from the given directory.

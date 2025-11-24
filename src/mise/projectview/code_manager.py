@@ -164,7 +164,7 @@ class CodeManager(QWidget):
         print(f"deleted code ID == {code_id}")
 
         self.refresh()
-        self.codes_updated.emit()
+        self.codes_updated.emit(True)
     
     def _on_edit_code_requested(self, code_id):
 

@@ -126,3 +126,5 @@ CREATE TABLE coded_segments (
 - Need to get the UI options set up, including increasing font size.
 - Memoing feature, perhaps in the AnalysisWidget, and in the ProjectWidget maybe when in the document tree, a right click allows an option to open document in memo mode which allows for a two panel window where on the left is the document and on the right a text editor where you can memo.
 - For analysis widget, should include an option that automatically adds to the segment which is to say expands the text selection from the document to include more context. And need some function to pull up the document from a segment.
+- Folder icons not appearing in file browser
+- need to set up the database documentation to follow the  Alembic versioning style with published schema
