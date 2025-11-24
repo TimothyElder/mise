@@ -43,6 +43,9 @@ from pathlib import Path
 
 from ..utils.import_service import import_files
 
+import logging
+log = logging.getLogger(__name__)
+
 ASSETS_DIR = Path(__file__).resolve().parent / "assets"
 
 # for cursor info
@@ -97,6 +100,7 @@ class DocumentBrowserWidget(QWidget):
         When clicking on items in the file browser emit path str if it is a file
         Refactor to use doc_id so it is managed by the database? 
         """
+        
 
         path = item.data(PATH_ROLE)
 
@@ -104,6 +108,7 @@ class DocumentBrowserWidget(QWidget):
             return  # Prevent None errors
 
         path = Path(path)
+        log.info("Something happened: %s", path)
 
 		# IF DIRECTORY
         if path.is_dir():

@@ -29,6 +29,9 @@ from pathlib import Path
 from ..utils.project_repository import ProjectRepository
 from .code_picker import CodePickerDialog
 
+import logging
+log = logging.getLogger(__name__)
+
 class DocumentViewerWidget(QWidget):
     documentChanged = Signal(int)            # maybe
     segmentAssigned = Signal(int, int, int)  # doc_id, start, end

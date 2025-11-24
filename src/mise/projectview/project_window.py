@@ -38,6 +38,9 @@ from .code_manager import CodeManager
 from .document_browser import DocumentBrowserWidget
 from .document_viewer import DocumentViewerWidget
 
+import logging
+log = logging.getLogger(__name__)
+
 ASSETS_DIR = Path(__file__).resolve().parent / "assets"
 
 # for cursor info
@@ -141,12 +144,10 @@ class ProjectWidget(QWidget):
         raise ValueError("Memo view Not yet implemented")
 
     def on_document_renamed(self, new_name: str, doc_id: int):
-        # NO DB CALL HERE
         if self.current_document_id == doc_id:
             # e.g. update window title, breadcrumbs, analysis views, etc.
             self.setWindowTitle(f"Mise – {new_name}")
             # maybe refresh any other widgets that mirror the doc name
-
         
     def on_document_activated(self, path: Path):
         # Ensure we always work with Path inside

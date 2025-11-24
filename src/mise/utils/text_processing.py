@@ -1,6 +1,9 @@
 import pandas as pd
 from nltk.tokenize import sent_tokenize, word_tokenize
 
+import logging
+log = logging.getLogger(__name__)
+
 def documentTokenizer(text: str, granularity: str = "sentence") -> pd.DataFrame:
     """
     Tokenizes a given text into sentences or words and returns a DataFrame.

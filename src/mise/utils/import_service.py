@@ -1,6 +1,9 @@
 from pathlib import Path
 from .file_io import convert_to_canonical_text
 
+import logging
+log = logging.getLogger(__name__)
+
 ALLOWED_EXTENSIONS = {".pdf", ".docx", ".doc", ".md", ".markdown"}
 
 def import_files(src_paths: list[Path], texts_dir: Path, repo) -> tuple[bool, list[str]]:

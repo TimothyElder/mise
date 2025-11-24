@@ -8,6 +8,9 @@ from PySide6.QtGui import QColor
 
 from ..utils.project_repository import ProjectRepository
 
+import logging
+log = logging.getLogger(__name__)
+
 class CodeManager(QWidget):
     codes_updated = Signal()
     code_added = Signal(int)        # new_code_id
@@ -58,8 +61,8 @@ class CodeManager(QWidget):
             raise ValueError(f"No code found with id={code_id}")
         
         if updated > 0:
-            self.codes_updated.emit(True)
-            print("SIGNAL EMITED")
+            self.codes_updated.emit()
+            
 
         return updated
 
@@ -294,15 +297,21 @@ class CodeDialog(QDialog):
 class CodeTreeWidget(QTreeWidget):
     codeSelected = Signal(int)  # code_id
 
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        # Whenever the selection changes, fire our own signal
+        self.itemSelectionChanged.connect(self._emit_code_selected)
+
     def mousePressEvent(self, event):
         item = self.itemAt(event.pos())
         if item is None:
             self.clearSelection()
         super().mousePressEvent(event)
 
-    def currentChanged(self, current, previous):
-        super().currentChanged(current, previous)
-        if current:
-            code_id = current.data(0, Qt.UserRole)
-            if code_id is not None:
-                self.codeSelected.emit(code_id)
+    def _emit_code_selected(self):
+        item = self.currentItem()
+        if not item:
+            return
+        code_id = item.data(0, Qt.UserRole)
+        if code_id is not None:
+            self.codeSelected.emit(code_id)

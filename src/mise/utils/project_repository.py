@@ -10,6 +10,9 @@ import sqlite3
 from pathlib import Path
 import uuid
 
+import logging
+log = logging.getLogger(__name__)
+
 class ProjectRepository:
     def __init__(self, db_path: Path | str):
         self.db_path = Path(db_path)

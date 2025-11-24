@@ -7,6 +7,9 @@ from PySide6.QtCore import QDir
 from mise.projectview.project_window import ProjectWidget
 from project_init import create_project
 
+import logging
+log = logging.getLogger(__name__)
+
 class CreateProjectDialog(QDialog):
     def __init__(self, parent: QWidget):
         super().__init__()

@@ -2,6 +2,9 @@ from pathlib import Path
 from .database import initialize_database
 from .metadata import initialize_metadata
 
+import logging
+log = logging.getLogger(__name__)
+
 def create_project(project_name: str, dirpath: str) -> Path:
     """
     High-level project creation.

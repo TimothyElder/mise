@@ -1,6 +1,9 @@
 import sqlite3
 from pathlib import Path
 
+import logging
+log = logging.getLogger(__name__)
+
 SCHEMA = """
 CREATE TABLE documents (
     id                INTEGER PRIMARY KEY,

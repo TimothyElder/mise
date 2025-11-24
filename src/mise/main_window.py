@@ -11,6 +11,9 @@ from .projectview.project_window import ProjectWidget
 from .project_init import create_project
 from .analysisview.analysis_window import AnalysisWidget
 
+import logging
+log = logging.getLogger(__name__)
+
 ASSETS_DIR = Path(__file__).resolve().parent / "assets"
 
 def asset_path(name: str) -> str:

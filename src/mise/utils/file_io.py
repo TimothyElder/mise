@@ -7,6 +7,9 @@ import markdown
 from pathlib import Path
 import pdfplumber
 
+import logging
+log = logging.getLogger(__name__)
+
 def convert_to_canonical_text(src_path: Path) -> str:
     """
     Convert source document, uploaded by the user,
