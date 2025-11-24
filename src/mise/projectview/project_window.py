@@ -58,10 +58,10 @@ class ProjectView(QWidget):
         splitter.setStretchFactor(1, 2)  # viewer
         splitter.setStretchFactor(2, 1)  # codes
         
-        self.file_browser_widget.documentActivated.connect(self.on_document_activated)
-        self.file_browser_widget.documentDeleted.connect(self.on_document_deleted)
-        self.file_browser_widget.documentRenamed.connect(self.on_document_renamed)
-        self.file_browser_widget.openInMemoRequested.connect(self.open_memo_view_for_document)
+        self.file_browser_widget.document_activated.connect(self.on_document_activated)
+        self.file_browser_widget.document_deleted.connect(self.on_document_deleted)
+        self.file_browser_widget.document_renamed.connect(self.on_document_renamed)
+        self.file_browser_widget.memo_view_requested.connect(self.open_memo_view_for_document)
         self.code_browser_widget.codes_updated.connect(self.file_viewer_widget.refresh_highlights)
         # self.code_browser_widget.code_deleted.connect(self.on_code_deleted)
 

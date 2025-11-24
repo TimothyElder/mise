@@ -1,37 +1,30 @@
-from PySide6.QtWidgets import (
-    QVBoxLayout, QWidget, QListWidget,
-    QPushButton, QListWidgetItem,  QWidget,
-    QFileDialog, QMessageBox, QMenu, QInputDialog
-)
-
-from PySide6.QtGui import (
-    QIcon)
-
-from PySide6.QtCore import Qt, Signal
-
-from pathlib import Path
-
-from ..utils.import_service import import_files
-
 import logging
 log = logging.getLogger(__name__)
+from pathlib import Path
 
-ASSETS_DIR = Path(__file__).resolve().parent / "assets"
+from PySide6.QtWidgets import (
+    QVBoxLayout, QWidget, QListWidget,
+    QPushButton, QListWidgetItem, QFileDialog,
+    QMessageBox, QMenu, QInputDialog
+)
+from PySide6.QtGui import (
+    QIcon)
+from PySide6.QtCore import Qt, Signal
+
+from ..utils.import_service import import_files
+from ..utils.paths import asset_path
 
 # for cursor info
 DOC_ID_ROLE = Qt.UserRole + 1
 PATH_ROLE = Qt.UserRole + 2
 
-def asset_path(name: str) -> str:
-    return str(ASSETS_DIR / name)
-
 class DocumentBrowserWidget(QWidget):
-    documentActivated = Signal(object)  # path
-    folderActivated = Signal(str)       # path
+    document_activated = Signal(object)  # path
+    folder_activated = Signal(str)       # path
 
-    documentDeleted = Signal(int, str)    # doc_id, text_path
-    documentRenamed = Signal(int, str)    # doc_id, new_name
-    openInMemoRequested = Signal(int)     # doc_id
+    document_deleted = Signal(int, str)    # doc_id, text_path
+    document_renamed = Signal(int, str)    # doc_id, new_name
+    memo_view_requested = Signal(int)     # doc_id
 
     def __init__(self, repo, texts_dir: Path, project_root: Path, parent=None):
         super().__init__(parent)
@@ -77,7 +70,7 @@ class DocumentBrowserWidget(QWidget):
             return  # Prevent None errors
 
         path = Path(path)
-        log.info("Something happened: %s", path)
+        log.info("Item clicked in DocumentBrowserWidget: %r", path)
 
 		# IF DIRECTORY
         if path.is_dir():
@@ -88,14 +81,11 @@ class DocumentBrowserWidget(QWidget):
             doc_id = self.repo.lookup_document_id(path)
             
             if doc_id is None:
-                print(f"[WARN] File not registered in documents: {path}")
+                log.warning("File not registered in documents: %r", path)
+            else:
+                log.info("Clicked document: doc_id=%s path=%r", doc_id, path)
             
-            self.current_document_id = doc_id
-            
-            print(f"doc_id from click is {doc_id}" )
-            print(f"path to document from click is {path}" )
-            
-            self.documentActivated.emit(path)
+            self.document_activated.emit(path)
             
     def populate_file_list(self, directory: Path):
         """
@@ -143,7 +133,7 @@ class DocumentBrowserWidget(QWidget):
                 self.file_list.addItem(item)
 
         except Exception as e:
-            print(f"Error accessing directory {self.current_path}: {e}")
+            log.error("Error accessing directory %r: %s", self.current_path,  e)
 
     def go_back(self):
         """
@@ -209,7 +199,7 @@ class DocumentBrowserWidget(QWidget):
 
         if action == open_action:
             # stub
-            self.openInMemoRequested.emit(doc_id)
+            self.memo_view_requested.emit(doc_id)
         elif action == rename_action:
             self.rename_document(item, doc_id)
         elif action == remove_action:
@@ -234,11 +224,11 @@ class DocumentBrowserWidget(QWidget):
         rows = self.repo.rename_document_db(new_name, doc_id)
         if rows:
             item.setText(new_name)
-            self.documentRenamed.emit(doc_id, new_name)
+            self.document_renamed.emit(doc_id, new_name)
 
     def delete_document_from_ui(self, item, doc_id: int):
         rows, text_path = self.repo.delete_document(doc_id)
-        print(f"[UI] repo deleted {rows} document(s) for id={doc_id}, path={text_path!r}")
+        log.info("Repo deleted %s document(s) for id=%s, path=%r", rows, doc_id, text_path)
 
         if rows:
             # 1) Remove file from disk
@@ -246,14 +236,14 @@ class DocumentBrowserWidget(QWidget):
                 try:
                     Path(text_path).unlink(missing_ok=True)
                 except Exception as e:
-                    print(f"[WARN] Failed to delete file {text_path}: {e}")
+                    log.warning("Failed to delete file %r: %s", text_path, e)
 
             # 2) Remove the item from the list
             row_index = self.file_list.row(item)
             self.file_list.takeItem(row_index)
 
             # Emit signal that document deleted
-            self.documentDeleted.emit(doc_id, text_path or "")
+            self.document_deleted.emit(doc_id, text_path or "")
 
         else:
-            print(f"[WARN] No document deleted for id {doc_id}")
+            log.warning("No document deleted for id=%s", doc_id)

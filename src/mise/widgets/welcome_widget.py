@@ -9,12 +9,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QPixmap
 from PySide6.QtCore import Qt, Signal
 
-ASSETS_DIR = Path(__file__).resolve().parent.parent / "assets"
-
-print(ASSETS_DIR)
-
-def asset_path(name: str) -> str:
-    return str(ASSETS_DIR / name)
+from ..utils.paths import asset_path
 
 class WelcomeWidget(QWidget):
     """

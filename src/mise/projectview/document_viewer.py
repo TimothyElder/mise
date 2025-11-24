@@ -11,15 +11,12 @@ from PySide6.QtGui import (
     QTextCursor, QTextCharFormat, 
     QColor)
 
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt
 
 from ..utils.project_repository import ProjectRepository
 from .code_picker import CodePickerDialog
 
 class DocumentViewerWidget(QWidget):
-    documentChanged = Signal(int)            # maybe
-    segmentAssigned = Signal(int, int, int)  # doc_id, start, end
-    segmentDeleted = Signal(int)             # segment_id
 
     def __init__(self, repo: ProjectRepository, parent=None):
         super().__init__(parent)
