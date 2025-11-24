@@ -13,12 +13,14 @@ class CodeManager(QWidget):
     code_added = Signal(int)        # new_code_id
     code_deleted = Signal(int)      # code_id
     code_edited = Signal(int)       # code_id
+    code_selected = Signal(int)
 
     def __init__(self, repo: ProjectRepository, parent=None):
         super().__init__(parent)
         self.repo = repo
         self.init_ui()
         self.refresh()
+        self.tree.codeSelected.connect(self._on_code_selected)
 
     def init_ui(self):
         layout = QVBoxLayout(self)
@@ -35,6 +37,9 @@ class CodeManager(QWidget):
         add_button = QPushButton("Add Code")
         add_button.clicked.connect(self.add_code_dialog)
         layout.addWidget(add_button)
+
+    def _on_code_selected(self, code_id: int):
+        self.code_selected.emit(code_id)
 
     # --- DB helpers ---
     def edit_code(self, code_id, label=None, parent_id=None, description=None, color=None):
@@ -287,8 +292,17 @@ class CodeDialog(QDialog):
         }
 
 class CodeTreeWidget(QTreeWidget):
+    codeSelected = Signal(int)  # code_id
+
     def mousePressEvent(self, event):
         item = self.itemAt(event.pos())
         if item is None:
             self.clearSelection()
         super().mousePressEvent(event)
+
+    def currentChanged(self, current, previous):
+        super().currentChanged(current, previous)
+        if current:
+            code_id = current.data(0, Qt.UserRole)
+            if code_id is not None:
+                self.codeSelected.emit(code_id)

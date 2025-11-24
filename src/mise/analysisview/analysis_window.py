@@ -62,4 +62,7 @@ class AnalysisWidget(QWidget):
 
         # need to create toolbar with some function calls
 
+        # When code selected show ssegments need to make this
+        self.code_manager.code_selected.connect(self.show_segments_for_code)
+
 
