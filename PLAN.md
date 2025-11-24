@@ -21,7 +21,6 @@
 - The file list in the project view (`ProjectWidget`) right now is file system driven rather than driven by the databse. A future development is to switch over to a database driven system for displaying files in the project view.
 
 
-
 A minimally working piece of software will require the following features:
 
 1. Loading data into Mise
