@@ -1,11 +1,11 @@
 # Mise <img src='src/mise/assets/mise.png' align="right" height="138.5" /></a>
 
-![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/TimothyElder/mise) ![Platform: macOS](https://img.shields.io/badge/platform-macOS-lightgrey.svg)
+![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg) ![GitHub release](https://img.shields.io/github/v/release/TimothyElder/mise) ![Platform: macOS](https://img.shields.io/badge/platform-macOS-lightgrey.svg)
 
 >For the professional, one's meez is an obsession, one's sword and shield, the only thing standing between you and chaos. If you have your meez right, it means you have your head together, you are "set up", stocked, organized, ready with everything you need and are likely to need for the tasks at hand.
 <p align="right"/>Anthony Bourdain, <em>Le Halles Cookbook</em></p>
 
-[Mise](https://en.wikipedia.org/wiki/Mise_en_place) is an open source qualitative data analysis tool that preserves all your data in open formats, emphasizes reporducibility of coding schemes, and is a no cost alternative to proprietary CAQDA software. It is designed to preserve the rich functionality of CAQDA software like atlas.ti or Dedoose while having no cost and a more straightforward design.
+[Mise](https://en.wikipedia.org/wiki/Mise_en_place) is an open source qualitative data analysis tool that preserves all your data in open formats, emphasizes reproducibility of coding schemes, and is a no cost alternative to proprietary CAQDA software. It is designed to preserve the rich functionality of CAQDA software like atlas.ti or Dedoose while having no cost and a more straightforward design.
 
 **Version:** 0.1.0 (Alpha)
 
