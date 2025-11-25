@@ -8,9 +8,10 @@ import logging
 log = logging.getLogger(__name__)
 
 from PySide6.QtWidgets import (
-    QWidget, QHBoxLayout, QSplitter, QStackedWidget, QGridLayout
+    QWidget, QHBoxLayout, QSplitter, QStackedWidget
 )
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QTextCursor
 
 from ..utils.project_repository import ProjectRepository
 from .code_stats_tree import CodeStatsTreeWidget
@@ -108,6 +109,8 @@ class AnalysisView(QWidget):
         # Code tree -> show code segments view
         self.code_tree.codeSelected.connect(self._on_code_selected)
 
+        self.code_segment_view.segmentActivated.connect(self._on_segment_activated)
+
     def show_document_page(self):
         self.stacked.setCurrentIndex(self.PAGE_DOCUMENT)
 
@@ -124,3 +127,21 @@ class AnalysisView(QWidget):
     def _on_code_selected(self, code_id: int):
         self.show_code_segments_page()
         self.code_segment_view.load_segments_for_code(code_id)
+    
+    def _on_segment_activated(self, doc_id: int, start: int, end: int, text_path: str):
+        # Switch to document page
+        self.show_document_page()
+
+        path = Path(text_path)
+        self.document_view.display_file_content(path)
+        self.document_view.current_document_id = doc_id
+
+        # Highlight all segments
+        self.document_view.refresh_highlights()
+
+        # Focus this specific segment
+        cursor = self.document_view.document_viewer.textCursor()
+        cursor.setPosition(start)
+        cursor.setPosition(end, QTextCursor.KeepAnchor)
+        self.document_view.document_viewer.setTextCursor(cursor)
+        self.document_view.document_viewer.ensureCursorVisible()

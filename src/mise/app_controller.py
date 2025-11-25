@@ -21,6 +21,9 @@ from pathlib import Path
 import logging
 log = logging.getLogger(__name__)
 from typing import Optional
+from datetime import datetime
+from html import escape
+import webbrowser
 
 from PySide6.QtWidgets import QMainWindow, QMessageBox
 
@@ -137,8 +140,155 @@ class AppController:
         )
         self._analysis_view = view
         self.main_window.setCentralWidget(view)
+    
+    # ---------- reports ------------------------------
 
-    # ---------- shutdown ----------
+    def generate_report(self, report_data: list[dict]):
+            """
+            report_data = [
+                {
+                    "code": {
+                        "id": int,
+                        "label": str,
+                        "color": str,
+                        "segment_count": int,
+                        "document_count": int,
+                    },
+                    "segments": [
+                        {
+                            "document_id": int,
+                            "display_name": str,
+                            "text_path": str,
+                            "start_offset": int,
+                            "end_offset": int
+                        },
+                        ...
+                    ]
+                },
+                ...
+            ]
+            """
+
+            if not report_data:
+                log.warning("generate_report called with empty report_data.")
+                return
+
+            # --------------------------------------------
+            # 1. Load HTML template
+            # --------------------------------------------
+            template_path = (
+                Path(__file__).resolve().parent
+                / "assets"
+                / "templates"
+                / "template.html"
+            )
+
+            try:
+                template = template_path.read_text(encoding="utf-8")
+            except FileNotFoundError:
+                log.error("Template not found at %r", template_path)
+                return
+
+            # --------------------------------------------
+            # 2. Generate report body (inner HTML)
+            # --------------------------------------------
+            project_name = escape(getattr(self, "current_project_name", "Unknown Project"))
+            body_parts = []
+
+            for entry in report_data:
+                code = entry["code"]
+                segments = entry["segments"]
+
+                code_label = escape(code["label"])
+                code_color = escape(code.get("color") or "#cccccc")
+                segment_count = code.get("segment_count", len(segments))
+                document_count = code.get("document_count", None)
+
+                # ----- Code header block -----
+                body_parts.append(
+                    f"<section>\n"
+                    f"<h2><span class='code-badge' "
+                    f"style='border-color:{code_color};background:{code_color}22;'>"
+                    f"{code_label}</span></h2>\n"
+                    f"<p>Project: {project_name}</p>\n"
+                    f"<p>Segments: {segment_count}"
+                    + (f" | Documents: {document_count}</p>\n" if document_count else "</p>\n")
+                )
+
+                # ----- Group segments by document -----
+                docs = {}
+                for seg in segments:
+                    doc = seg["display_name"]
+                    docs.setdefault(doc, []).append(seg)
+
+                # ----- Write segments for each document -----
+                for doc_name, seg_list in docs.items():
+                    body_parts.append(f"<h3>{escape(doc_name)}</h3>\n")
+
+                    for seg in seg_list:
+                        path = seg["text_path"]
+                        start = seg["start_offset"]
+                        end = seg["end_offset"]
+
+                        try:
+                            content = Path(path).read_text(encoding="utf-8")
+                            snippet = escape(content[start:end].strip())
+                        except Exception as e:
+                            snippet = "[Error reading snippet]"
+                            log.warning(f"Error reading snippet for {path}: {e}")
+
+                        body_parts.append(
+                            "<div class='segment'>\n"
+                            f"  <div class='segment-header'>Offsets: {start}–{end} | Path: {escape(path)}</div>\n"
+                            f"  <div class='snippet'>{snippet}</div>\n"
+                            "</div>\n"
+                        )
+
+                body_parts.append("</section>\n")
+
+            body_html = "".join(body_parts)
+            
+            # --------------------------------------------
+            # 2b. Fill PROJECT_NAME
+            # --------------------------------------------
+            project_name = getattr(self, "current_project_name", "Unknown Project")
+            template = template.replace("{{PROJECT_NAME}}", escape(project_name))
+
+            logo_path = (
+                Path(__file__).resolve().parent / "assets" / "mise.png"
+            ).as_uri()
+
+            template = template.replace("{{LOGO_PATH}}", logo_path)
+
+            # --------------------------------------------
+            # 3. Fill template (replace {{CONTENT}})
+            # --------------------------------------------
+            if "{{CONTENT}}" in template:
+                full_html = template.replace("{{CONTENT}}", body_html)
+            else:
+                # fallback: append at end
+                full_html = template + "\n" + body_html
+
+            # --------------------------------------------
+            # 4. Save report to project_root/reports/
+            # --------------------------------------------
+            reports_dir = self.current_project_root / "reports"
+            reports_dir.mkdir(exist_ok=True)
+
+            timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+            file_name = f"code-report-{timestamp}.html"
+
+            out_path = reports_dir / file_name
+            out_path.write_text(full_html, encoding="utf-8")
+
+            try:
+                webbrowser.open(out_path.as_uri())
+            except Exception as e:
+                log.warning("Could not open report automatically: %s", e)
+
+            log.info("Report successfully written to %r", out_path)
+
+    # ---------- shutdown ------------------------------
 
     def shutdown(self):
         # Single place to close the repo

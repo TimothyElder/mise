@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Mise Code Report</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 800px; margin: 2rem auto; }
+    header { border-bottom: 1px solid #ccc; margin-bottom: 1.5rem; padding-bottom: 0.5rem; }
+    .code-badge { padding: 0.2rem 0.5rem; border-radius: 4px; border: 1px solid #666; }
+    .segment { margin-bottom: 1rem; padding: 0.5rem 0.75rem; border: 1px solid #eee; border-radius: 4px; }
+    .segment-header { font-size: 0.85rem; color: #555; margin-bottom: 0.25rem; }
+    .snippet { font-size: 0.95rem; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <header style="position:relative;">
+    <img src="{{LOGO_PATH}}" alt="Mise Logo"
+        style="position:absolute; top:1rem; right:1rem; height:60px;">
+    <h1>Mise Code Report</h1>
+    <p>Project: {{PROJECT_NAME}}</p>
+  </header>
+
+  {{CONTENT}}
+
+</body>
+</html>

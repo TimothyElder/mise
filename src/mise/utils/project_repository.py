@@ -312,6 +312,27 @@ class ProjectRepository:
                 # snippet can be computed later
             })
         return result
+    
+    def get_code_metadata(self, code_id: int):
+        cursor = self.conn.execute(
+            """
+            SELECT
+                c.id          AS id,
+                c.label       AS label,
+                c.color       AS color,
+                COUNT(s.id)   AS segment_count,
+                COUNT(DISTINCT s.document_id) AS document_count
+            FROM codes c
+            LEFT JOIN coded_segments s ON s.code_id = c.id
+            WHERE c.id = ?
+            GROUP BY c.id, c.label, c.color
+            """,
+            (code_id,)
+        )
+        row = cursor.fetchone()
+        if row is None:
+            return None
+        return dict(row)
 
     # ---- lifecycle -------------------------------------------------
     def close(self) -> None:

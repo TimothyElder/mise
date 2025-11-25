@@ -3,11 +3,12 @@ import logging
 log = logging.getLogger(__name__)
 
 from PySide6.QtWidgets import (
-    QMainWindow, QFileDialog, QInputDialog, QMessageBox
+    QMainWindow, QFileDialog, QInputDialog, QMessageBox, QDialog
 )
 from PySide6.QtCore import QDir
 
 from .widgets.welcome_widget import WelcomeWidget
+from .widgets.report_dialog import CodeReportDialog
 from .app_controller import AppController
 
 class MainWindow(QMainWindow):
@@ -78,8 +79,50 @@ class MainWindow(QMainWindow):
         switch_to_project = view_menu.addAction("Open Project View")
         switch_to_project.triggered.connect(self._handle_project_view_requested)
 
+        report_menu = menu_bar.addMenu("Reports")
+        generate_code_report = report_menu.addAction("Generate Code Report")
+        generate_code_report.triggered.connect(self._handle_generate_report_requested)
+
         about_mise = view_menu.addAction("About Mise")
         about_mise.triggered.connect(self._handle_show_about_dialog)
+
+    def _handle_generate_report_requested(self):
+        """
+        Call report dialog and send results to app controller to generate html report
+        """
+
+        dialog = CodeReportDialog(self.controller.current_repo, self)
+        if dialog.exec() != QDialog.Accepted:
+            return
+
+        code_ids = dialog.get_selected_code_ids()
+
+        if not code_ids:
+            QMessageBox.information(
+                "No codes selected",
+                "Please select at least one code to include in the report.",
+            )
+            return
+
+        if self.controller.current_repo is None:
+            QMessageBox.warning(
+                "No project open",
+                "Open a project before generating reports.",
+            )
+            return
+
+        report_data = []
+
+        for code_id in code_ids:
+            meta = self.controller.current_repo.get_code_metadata(code_id)
+            segments = self.controller.current_repo.get_segments_for_code(code_id)
+
+            report_data.append({
+                "code": meta,
+                "segments": segments
+            })        
+
+        self.controller.generate_report(report_data)
 
     def _handle_open_analysis_requested(self):
         """
