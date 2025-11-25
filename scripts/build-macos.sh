@@ -15,7 +15,7 @@ source .venv/bin/activate
 pip show pyinstaller >/dev/null 2>&1 || pip install pyinstaller
 
 # Clean old builds
-rm -rf build dist Mise.spec
+rm -rf build dist
 
 # Build from spec
 pyinstaller mise.spec

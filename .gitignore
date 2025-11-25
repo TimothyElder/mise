@@ -19,3 +19,5 @@
 *.pyc
 __pycache__
 /src/mise_qda.egg-info/*
+/dist
+/build

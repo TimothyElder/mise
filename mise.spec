@@ -1,22 +1,27 @@
 # mise.spec
 from pathlib import Path
 from PyInstaller.utils.hooks import collect_submodules
+from PyInstaller.utils.hooks import collect_submodules
 from PyInstaller.building.build_main import Analysis, PYZ, EXE, BUNDLE
-from PyInstaller.building.datastruct import TOC
 
-project_root = Path(__file__).resolve().parent
+# PyInstaller does not set __file__ — use cwd instead (build script cds to project root)
+project_root = Path(os.getcwd()).resolve()
 src_dir = project_root / "src"
 
 block_cipher = None
 
-# Include all submodules of mise to be safe
+# Include all mise submodules
 hidden_imports = collect_submodules("mise")
 
 # Assets directory
 assets_src = src_dir / "mise" / "assets"
 
-datas = TOC()
-datas.append((str(assets_src), "mise/assets", "DATA"))
+icon_file = assets_src / "mise.icns"
+
+# datas must be a sequence of 2-tuples: (source, target-relative-dir)
+datas = [
+    (str(assets_src), "mise/assets"),
+]
 
 a = Analysis(
     ['src/mise/__main__.py'],
@@ -31,7 +36,11 @@ a = Analysis(
     noarchive=False,
 )
 
-pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
+pyz = PYZ(
+    a.pure,
+    a.zipped_data,
+    cipher=block_cipher,
+)
 
 exe = EXE(
     pyz,
@@ -45,15 +54,15 @@ exe = EXE(
     strip=False,
     upx=True,
     upx_exclude=[],
-    console=False,  # GUI app
+    console=False,
     disable_windowed_traceback=False,
-    argv_emulation=True,  # nice on macOS
+    argv_emulation=False,
     target_arch=None,
 )
 
 app = BUNDLE(
     exe,
     name="Mise.app",
-    icon=None,  # add an .icns later
+    icon=str(icon_file),
     bundle_identifier="org.mise.qda",
 )

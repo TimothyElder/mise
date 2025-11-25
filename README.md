@@ -1,22 +1,38 @@
-# Mise <img src='src/mise/assets/mise.png' align="right" height="138.5" />
+# Mise <img src='src/mise/assets/mise.png' align="right" height="138.5" /></a>
 
 >For the professional, one's meez is an obsession, one's sword and shield, the only thing standing between you and chaos. If you have your meez right, it means you have your head together, you are "set up", stocked, organized, ready with everything you need and are likely to need for the tasks at hand.
-<p align="right"/>Anthony Bourdain, <em>Le Halles Cookbook</em></p> 
+<p align="right"/>Anthony Bourdain, <em>Le Halles Cookbook</em></p>
 
 [Mise](https://en.wikipedia.org/wiki/Mise_en_place) is an open source qualitative data analysis tool that preserves all your data in open formats, emphasizes reporducibility of coding schemes, and is a no cost alternative to proprietary CAQDA software. It is designed to preserve the rich functionality of CAQDA software like atlas.ti or Dedoose while having no cost and a more straightforward design.
 
 **Version:** 0.1.0 (Alpha)
+
 **Status:** Early-stage, expect breaking changes.
+
 **Supported OS:** macOS, Windows, Linux
+
 [Changelog](CHANGELOG.md)
+
 [License: GPLv3](LICENSE)
+
 [Code of Conduct](CODE_OF_CONDUCT.md)
 
 ![welcome-widget](/screenshots/welcome-widget.png)
 
 ## Installation
 
-See [relaeses](https://github.com/TimothyElder/mise/releases) for installation instruction
+See [releaeses](https://github.com/TimothyElder/mise/releases) for full installation instructions.
+
+On macOS you can clone the source code and build:
+
+```sh
+git clone https://github.com/TimothyElder/mise.git
+cd mise
+make install
+make build-macos
+# dist/Mise.app appears
+
+```
 
 ## Usage
 
