@@ -169,6 +169,7 @@ Advanced users may want to have the option to script functionality in Mise as we
 - For packaging the app need to set `setup_logging(..., level=logging.INFO)` in the `app.py` file.
 - extract project creation flow into helper method `_handle_create_new_project_requested`, because UI ↔ filesystem ↔ repo should not live in one function
 - add redaction functionality
+- add font support
 
 ### Proposed Order of Development
 

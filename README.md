@@ -9,7 +9,7 @@
 
 **Status:** Early-stage, expect breaking changes.
 
-**Supported OS:** macOS, Windows, Linux
+**Supported OS:** macOS
 
 [Changelog](CHANGELOG.md)
 
@@ -17,11 +17,20 @@
 
 [Code of Conduct](CODE_OF_CONDUCT.md)
 
+## Screenshots
+
+### Welcome Widget — Create or open a project
 ![welcome-widget](/screenshots/welcome-widget.png)
+
+### Project View — Import documents and manage code hierarchies
+![project-view](/screenshots/project-view.png)
+
+### Analysis View — Review coded segments and generate reports
+![analysis-view](/screenshots/analysis-view.png)
 
 ## Installation
 
-See [releaeses](https://github.com/TimothyElder/mise/releases) for full installation instructions.
+See [releases](https://github.com/TimothyElder/mise/releases) for full installation instructions.
 
 On macOS you can clone the source code and build:
 
@@ -46,6 +55,7 @@ make build-macos
 ## Road Map
 
 ### In progress
+- Support for Windows and Linux
 - PDF imports to project
 - UI styling and size changes for legibility
 
@@ -67,5 +77,3 @@ A good issue report includes:
 - Steps to reproduce the problem
 - Expected behavior vs actual behavior
 - Relevant screenshots or logs
-
-
