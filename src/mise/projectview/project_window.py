@@ -6,7 +6,7 @@ from PySide6.QtWidgets import (
     QSplitter, QVBoxLayout, QWidget
 )
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 
 from ..utils.project_repository import ProjectRepository
 from .code_browser import CodeBrowserWidget
@@ -14,6 +14,8 @@ from .document_browser import DocumentBrowserWidget
 from .document_viewer import DocumentViewerWidget
 
 class ProjectView(QWidget):
+
+    documentDeleted = Signal(int)
 
     def __init__(self, project_name, project_root, repo: ProjectRepository):
         super().__init__()
@@ -65,21 +67,13 @@ class ProjectView(QWidget):
         self.code_browser_widget.codes_updated.connect(self.file_viewer_widget.refresh_highlights)
         # self.code_browser_widget.code_deleted.connect(self.on_code_deleted)
 
-    def debug_state(self):
-        """
-        debug sentinel
-        """
-        print("Browser:", self.file_browser_widget.current_path)
-        print("Project:", self.current_document_id)
-        print("Viewer:", self.file_viewer_widget.current_document_id)
-
     def on_document_deleted(self, doc_id: int, text_path: str):
         if self.file_viewer_widget.current_document_id == doc_id:
             self.file_viewer_widget.clear_document()
             log.info("Deleted active document_id=%s (path=%r)", doc_id, text_path)
 
     def open_memo_view_for_document(self):
-        raise ValueError("Memo view Not yet implemented")
+        log.warning("Memo view not yet implemented")
 
     def on_document_renamed(self, doc_id: int, new_name: str):
         if self.file_viewer_widget.current_document_id == doc_id:
@@ -103,11 +97,3 @@ class ProjectView(QWidget):
         # Show content and refresh highlights for that doc
         self.file_viewer_widget.display_file_content(path)
         self.file_viewer_widget.refresh_highlights()
-    
-    def closeEvent(self, event):
-        """
-        Close database connection
-        """
-        if hasattr(self, "repo"):
-            self.repo.close()
-        super().closeEvent(event)

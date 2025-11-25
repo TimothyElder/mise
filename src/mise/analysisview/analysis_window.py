@@ -3,66 +3,124 @@ This handles bringing tpogether the different analysis widgets
 including a code tree, document tree and then the multi use viewer
 andn toolbar.
 """
+from pathlib import Path
+import logging
+log = logging.getLogger(__name__)
 
 from PySide6.QtWidgets import (
-    QSplitter, QVBoxLayout, QWidget, QListWidget,
-    QTextBrowser, QPushButton, QListWidgetItem,
-    QFileDialog, QMessageBox, QDialog, QGridLayout
+    QWidget, QHBoxLayout, QSplitter, QStackedWidget, QGridLayout
 )
-
-from PySide6.QtGui import (
-    QIcon, QTextCursor, QTextCharFormat, 
-    QColor)
-
 from PySide6.QtCore import Qt
 
-from pathlib import Path
-
-from mise.utils.project_repository import ProjectRepository
-
+from ..utils.project_repository import ProjectRepository
+from .code_stats_tree import CodeStatsTreeWidget
+from .document_stats_tree import DocumentStatsTreeWidget
+from .analysis_document_viewer import AnalysisDocumentViewerWidget
+from .code_viewer import CodeSegmentView  # you’ll create this
 
 # write analysis helper scripts in the /analysis directory and make them accessible above including:
 #   - tokenize text
 #   - network functions
 #   - word cloud
 
-class AnalysisWindow(QWidget):
-    def __init__(self, project_name, project_root):
-        super().__init__()
+class AnalysisView(QWidget):
 
-        # Config
-        self.project_name = project_name
-        self.project_root = Path(project_root)
-        self.texts_dir = self.project_root / "texts"
+    PAGE_DOCUMENT = 0
+    PAGE_CODE_SEGMENTS = 1
 
-       # Open Database connection via repository
-        self.db_path = self.project_root / "project.db"
-        self.repo = ProjectRepository(self.db_path)
+    def __init__(self, project_name: str, project_root: Path, repo: ProjectRepository, parent=None):
+        super().__init__(parent)
+        self.repo = repo
+        self.project_root = project_root
 
+        # Left: vertical splitter
+        self.code_tree = CodeStatsTreeWidget(repo=self.repo, parent=self)
+        self.document_tree = DocumentStatsTreeWidget(repo=self.repo, parent=self)
 
-        # State
-        current_document_id = None
-        current_path = None
-        current_segment_id  = None
-        current_code_id = None
+        left_splitter = QSplitter(Qt.Vertical)
+        left_splitter.addWidget(self.code_tree)
+        left_splitter.addWidget(self.document_tree)
+        left_splitter.setStretchFactor(0, 1)
+        left_splitter.setStretchFactor(1, 1)
 
-        main_layout = QGridLayout(self)
+        # Style: visible handle + resize cursor
+        left_splitter.setHandleWidth(6)
+        left_splitter.setStyleSheet("""
+            QSplitter::handle {
+                background-color: #dddddd;
+            }
+            QSplitter::handle:vertical {
+                margin: 0px;
+                cursor: splitVCursor;  /* up-down arrows */
+            }
+        """)
 
-        # Include call to connect to repository so information can be pulled in
-        # self.repo.....
+        # ----- Right side: stacked widget (document view vs code segments) -----
+        self.document_view = AnalysisDocumentViewerWidget(repo, self)
+        self.code_segment_view = CodeSegmentView(repo, self)
 
-        # add layouts for:
-        #    • AnalysisWidget with:
-        #       • left QSplitter:
-        #           • CodeTreeWidget
-        #           • DocumentTreeWidget
-        #       • right QStackedWidget:
-        #           • DocumentView
-        #           • CodeSegmentView
+        self.stacked = QStackedWidget()
+        self.stacked.addWidget(self.document_view)      # PAGE_DOCUMENT
+        self.stacked.addWidget(self.code_segment_view)  # PAGE_CODE_SEGMENTS
 
-        # need to create toolbar with some function calls
+        # Default: show document
+        self.stacked.setCurrentIndex(self.PAGE_DOCUMENT)
 
-        # When code selected show ssegments need to make this
-        self.code_manager.code_selected.connect(self.show_segments_for_code)
+        # ----- Main horizontal splitter -----
+        main_splitter = QSplitter(Qt.Horizontal)
+        main_splitter.addWidget(left_splitter)
+        main_splitter.addWidget(self.stacked)
+        main_splitter.setStretchFactor(0, 0)  # left narrower
+        main_splitter.setStretchFactor(1, 1)  # right grows
 
+        # Style: visible handle + resize cursor
+        main_splitter.setHandleWidth(6)
+        main_splitter.setStyleSheet("""
+            QSplitter::handle {
+                background-color: #dddddd;
+            }
+            QSplitter::handle:horizontal {
+                margin: 0px;
+                cursor: splitHCursor;  /* left-right arrows */
+            }
+        """)
 
+        # ----- Top-level layout -----
+        layout = QHBoxLayout(self)
+        layout.addWidget(main_splitter)
+        layout.setContentsMargins(0, 0, 0, 0)
+        self.setLayout(layout)
+
+        # Later: wire up signals
+        self._connect_signals()
+
+    def _connect_signals(self):
+        """
+        Hook up interactions:
+        - selecting a document in the document tree loads it in document_view
+        - selecting a code switches stacked widget to code segments, etc.
+        """
+        # Example / placeholder; adapt to your actual signal API.
+
+        # Document tree -> show document view
+        self.document_tree.documentSelected.connect(self._on_document_selected)
+
+        # Code tree -> show code segments view
+        self.code_tree.codeSelected.connect(self._on_code_selected)
+
+    def show_document_page(self):
+        self.stacked.setCurrentIndex(self.PAGE_DOCUMENT)
+
+    def show_code_segments_page(self):
+        self.stacked.setCurrentIndex(self.PAGE_CODE_SEGMENTS)
+
+    def _on_document_selected(self, text_path: str, doc_id: int):
+        text_path = Path(text_path)
+        self.show_document_page()
+        self.document_view.display_file_content(text_path)
+        self.document_view.current_document_id = doc_id
+        self.document_view.refresh_highlights()
+
+    def _on_code_selected(self, code_id: int):
+        self.show_code_segments_page()
+        self.code_segment_view.load_segments_for_code(code_id)

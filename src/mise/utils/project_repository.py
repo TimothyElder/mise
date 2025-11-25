@@ -1,9 +1,3 @@
-"""
-project_repository.py
-
-Manages all database calls.
-"""
-
 from __future__ import annotations
 
 import sqlite3
@@ -80,9 +74,6 @@ class ProjectRepository:
         return cur_docs.rowcount, text_path
 
     def rename_document_db(self, new_display_name, document_id):
-
-        print(new_display_name)
-        print(document_id)
         
         cur = self.conn.execute(
             """
@@ -228,6 +219,99 @@ class ProjectRepository:
         # Delete the segment from the coded_segment by segment_id
         self.conn.execute("DELETE FROM coded_segments WHERE id = ?", (segment_id,))
         self.conn.commit()
+
+    # ---- analysis -------------------------------------------------
+
+    def get_code_usage_overview(self):
+        cursor=self.conn.execute(
+            """
+            SELECT
+            c.id AS id,
+            c.label,
+            c.color,
+            COUNT(s.id) AS segment_count,
+            COUNT(DISTINCT s.document_id) AS document_count
+            FROM codes c
+            LEFT JOIN coded_segments s ON s.code_id = c.id
+            GROUP BY c.id, c.label, c.color
+            ORDER BY c.label;
+            """)
+        self.conn.commit()
+        
+        rows = cursor.fetchall()
+
+        result = []
+        for row in rows:
+            result.append({
+                "id": row[0],
+                "label": row[1],
+                "color": row[2],
+                "segment_count": row[3],
+                "document_count": row[4],
+            })
+
+        return result
+    
+    def get_document_coding_overview(self):
+        cursor=self.conn.execute(
+            """
+            SELECT
+            d.id AS id,
+            d.display_name AS name,
+            d.text_path AS path,
+            COUNT(s.id) AS segment_count,
+            COUNT(DISTINCT s.code_id) AS unique_codes
+            FROM documents d
+            LEFT JOIN coded_segments s ON s.document_id = d.id
+            GROUP BY d.id, d.display_name
+            ORDER BY d.display_name;
+            """)
+        self.conn.commit()
+        rows = cursor.fetchall()
+
+        result = []
+        for row in rows:
+            result.append({
+                "doc_id": row[0],
+                "display_name": row[1],
+                "path": row[2],
+                "segment_count": row[3],
+                "unique_codes": row[4],
+            })
+        return(result)
+    
+    def get_segments_for_code(self, code_id: int):
+        cursor = self.conn.execute(
+            """
+            SELECT
+                s.id,
+                s.document_id,
+                d.display_name AS name,
+                d.text_path AS path,
+                s.start_offset,
+                s.end_offset                                                                                        n
+            FROM coded_segments s
+            JOIN documents d ON d.id = s.document_id
+            WHERE s.code_id = ?
+            ORDER BY d.display_name, s.start_offset;
+            """,
+            (code_id,)
+        )
+
+        rows = cursor.fetchall()
+
+        result = []
+        for row in rows:
+            result.append({
+                "segment_id": row[0],
+                "document_id": row[1],
+                "display_name": row[2],
+                "text_path": row[3],
+                "start_offset": row[4],
+                "end_offset": row[5],
+                # snippet can be computed later
+            })
+        return result
 
     # ---- lifecycle -------------------------------------------------
     def close(self) -> None:
