@@ -5,7 +5,7 @@
 
 [Mise](https://en.wikipedia.org/wiki/Mise_en_place) is an open source qualitative data analysis tool that preserves all your data in open formats, emphasizes reporducibility of coding schemes, and is a no cost alternative to proprietary CAQDA software. It is designed to preserve the rich functionality of CAQDA software like atlas.ti or Dedoose while having no cost and a more straightforward design.
 
-**Version:** 0.1.0 (Alpha)  
+**Version:** 0.1.0 (Alpha)
 **Status:** Early-stage, expect breaking changes.
 **Supported OS:** macOS, Windows, Linux
 [Changelog](CHANGELOG.md)
