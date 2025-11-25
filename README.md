@@ -1,5 +1,7 @@
 # Mise <img src='src/mise/assets/mise.png' align="right" height="138.5" /></a>
 
+![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/TimothyElder/mise) ![Platform: macOS](https://img.shields.io/badge/platform-macOS-lightgrey.svg)
+
 >For the professional, one's meez is an obsession, one's sword and shield, the only thing standing between you and chaos. If you have your meez right, it means you have your head together, you are "set up", stocked, organized, ready with everything you need and are likely to need for the tasks at hand.
 <p align="right"/>Anthony Bourdain, <em>Le Halles Cookbook</em></p>
 
@@ -32,7 +34,7 @@
 
 See [releases](https://github.com/TimothyElder/mise/releases) for full installation instructions.
 
-On macOS you can clone the source code and build:
+On macOS you can install from source:
 
 ```sh
 git clone https://github.com/TimothyElder/mise.git
