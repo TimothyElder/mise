@@ -48,7 +48,7 @@ test: install
 	$(PY) -m pytest
 
 clean:
-	rm -rf build dist *.spec
+	rm -rf build dist
 	find . -name "__pycache__" -type d -exec rm -rf {} +
 
 distclean: clean

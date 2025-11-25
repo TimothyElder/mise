@@ -13,7 +13,7 @@ def run():
     setup_logging(Path.home() / ".mise", level=logging.DEBUG)
     app = QApplication(sys.argv)
 
-    icon = QIcon(str(asset_path("mise.png")))
+    icon = QIcon(str(asset_path("mise-icon.png")))
     app.setWindowIcon(icon)
 
     app.setDesktopFileName("Mise")
