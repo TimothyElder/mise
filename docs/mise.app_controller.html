@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module mise.app_controller</title>
+</head><body>
+
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="mise.html" class="white">mise</a>.app_controller</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:/Users/timothyelder/Documents/mise/src/mise/app_controller.py">/Users/timothyelder/Documents/mise/src/mise/app_controller.py</a></td></tr></table>
+    <p></p>
+<p>
+<table class="section">
+<tr class="decor pkg-content-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
+    
+<tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="logging.html">logging</a><br>
+</td><td class="multicolumn"><a href="webbrowser.html">webbrowser</a><br>
+</td><td class="multicolumn"></td><td class="multicolumn"></td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor index-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Classes</strong></td></tr>
+    
+<tr><td class="decor index-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl>
+<dt class="heading-text"><a href="builtins.html#object">builtins.object</a>
+</dt><dd>
+<dl>
+<dt class="heading-text"><a href="mise.app_controller.html#AppController">AppController</a>
+</dt></dl>
+</dd>
+</dl>
+ <p>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="AppController">class <strong>AppController</strong></a>(<a href="builtins.html#object">builtins.object</a>)</td></tr>
+    
+<tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
+<td class="decor title-decor" colspan=2><span class="code"><a href="#AppController">AppController</a>(main_window:&nbsp;PySide6.QtWidgets.QMainWindow)<br>
+&nbsp;<br>
+Central&nbsp;program&nbsp;controller,&nbsp;handles&nbsp;all&nbsp;state&nbsp;changes&nbsp;and&nbsp;project&nbsp;life-cycle<br>
+functions.<br>&nbsp;</span></td></tr>
+<tr><td>&nbsp;</td>
+<td class="singlecolumn">Methods defined here:<br>
+<dl><dt><a name="AppController-__init__"><strong>__init__</strong></a>(self, main_window: PySide6.QtWidgets.QMainWindow)</dt><dd><span class="code">Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</span></dd></dl>
+
+<dl><dt><a name="AppController-create_project"><strong>create_project</strong></a>(self, project_name: str, base_dir: pathlib._local.Path)</dt><dd><span class="code">Create&nbsp;Mise&nbsp;project,&nbsp;change&nbsp;current&nbsp;project&nbsp;state,&nbsp;switches&nbsp;main<br>
+widget&nbsp;to&nbsp;project&nbsp;view<br>
+&nbsp;<br>
+:param&nbsp;project_name:&nbsp;User&nbsp;inputted&nbsp;name.<br>
+:type&nbsp;project_name:&nbsp;str<br>
+:param&nbsp;base_dir:&nbsp;User&nbsp;selected&nbsp;directory&nbsp;where&nbsp;project&nbsp;stored.<br>
+:type&nbsp;base_dir:&nbsp;Path</span></dd></dl>
+
+<dl><dt><a name="AppController-generate_report"><strong>generate_report</strong></a>(self, report_data: list[dict])</dt><dd><span class="code">Export&nbsp;HTML&nbsp;code&nbsp;report&nbsp;from&nbsp;selected&nbsp;codes,&nbsp;open&nbsp;report&nbsp;in&nbsp;default&nbsp;browser.<br>
+&nbsp;<br>
+:param&nbsp;self:&nbsp;Description<br>
+:param&nbsp;report_data:&nbsp;List&nbsp;of&nbsp;dictionaries&nbsp;containing&nbsp;code&nbsp;and&nbsp;segment&nbsp;info<br>
+:type&nbsp;report_data:&nbsp;list[dict]</span></dd></dl>
+
+<dl><dt><a name="AppController-open_project"><strong>open_project</strong></a>(self, project_root: pathlib._local.Path)</dt><dd><span class="code">Open&nbsp;existing&nbsp;project,&nbsp;checking&nbsp;if&nbsp;.mise&nbsp;file&nbsp;in&nbsp;user&nbsp;selected&nbsp;directory.<br>
+Switches&nbsp;to&nbsp;project&nbsp;view.<br>
+&nbsp;<br>
+:param&nbsp;project_root:&nbsp;path&nbsp;to&nbsp;project&nbsp;directory<br>
+:type&nbsp;project_root:&nbsp;Path</span></dd></dl>
+
+<dl><dt><a name="AppController-show_analysis_view"><strong>show_analysis_view</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="AppController-show_project_view"><strong>show_project_view</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="AppController-shutdown"><strong>shutdown</strong></a>(self)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor data-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Data</strong></td></tr>
+    
+<tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><strong>Optional</strong> = typing.Optional<br>
+<strong>log</strong> = &lt;Logger mise.app_controller (WARNING)&gt;</td></tr></table>
+</body></html>

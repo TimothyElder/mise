@@ -1,15 +1,22 @@
 # Makefile for Mise
 
-PYTHON ?= python3
-VENV := .venv
-VENV_BIN := $(VENV)/bin
-PIP := $(VENV_BIN)/pip
-PY := $(VENV_BIN)/python
+# Detect OS
+ifeq ($(OS),Windows_NT)
+    PYTHON = py
+    VENV_PYTHON = .venv/Scripts/python.exe
+    VENV_PIP    = .venv/Scripts/pip.exe
+else
+    PYTHON = python3
+    VENV_PYTHON = .venv/bin/python
+    VENV_PIP    = .venv/bin/pip
+endif
 
+PYDOC_MODULES := $(shell $(PYTHON) -c "import sys, pkgutil; sys.path.insert(0, 'src'); import mise; print(' '.join(m.name for m in pkgutil.walk_packages(mise.__path__, 'mise.') if m.name != 'mise.__main__'))")
+DMG_NAME = Mise-0.1.0.dmg
 APP_NAME := mise
 PACKAGE := mise
 
-.PHONY: help venv install dev run build-macos build-windows test clean distclean
+.PHONY: help venv install dev run build-macos build-windows test clean distclean docs
 
 help:
 	@echo "Common targets:"
@@ -28,9 +35,10 @@ $(VENV):
 
 venv: $(VENV)
 
-install: venv
-	$(PIP) install --upgrade pip
-	$(PIP) install -e .
+install:
+	$(PYTHON) -m venv .venv
+	$(VENV_PIP) install --upgrade pip
+	$(VENV_PIP) install -e .
 
 run: install
 	$(PY) -m $(PACKAGE)
@@ -42,10 +50,25 @@ build-macos: install
 	./scripts/build-macos.sh
 
 build-windows:
-	./scripts/build-windows.bat
+	$(VENV_PYTHON) -m PyInstaller mise.spec
 
 test: install
 	$(PY) -m pytest
+
+docs:
+	PYTHONPATH=src $(PYTHON) -m pydoc -w $(PYDOC_MODULES)
+	mkdir -p docs
+	mv -f *.html docs/
+
+dmg: build-macos
+	mkdir -p build/dmg
+	cp -R dist/Mise.app build/dmg/
+	hdiutil create \
+	  -volname "Mise" \
+	  -srcfolder build/dmg \
+	  -ov \
+	  -format UDZO \
+	  dist/$(DMG_NAME)
 
 clean:
 	rm -rf build dist

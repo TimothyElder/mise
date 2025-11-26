@@ -18,3 +18,4 @@ source .venv/bin/activate
 # .venv\Scripts\activate
 pip install .
 mise
+```

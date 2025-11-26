@@ -1,5 +1,5 @@
 import pandas as pd
-from nltk.tokenize import sent_tokenize, word_tokenize
+# from nltk.tokenize import sent_tokenize, word_tokenize
 
 import logging
 log = logging.getLogger(__name__)

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module mise.utils.project_repository</title>
+</head><body>
+
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="mise.html" class="white">mise</a>.<a href="mise.utils.html" class="white">utils</a>.project_repository</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:/Users/timothyelder/Documents/mise/src/mise/utils/project_repository.py">/Users/timothyelder/Documents/mise/src/mise/utils/project_repository.py</a></td></tr></table>
+    <p></p>
+<p>
+<table class="section">
+<tr class="decor pkg-content-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
+    
+<tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="logging.html">logging</a><br>
+</td><td class="multicolumn"><a href="sqlite3.html">sqlite3</a><br>
+</td><td class="multicolumn"><a href="uuid.html">uuid</a><br>
+</td><td class="multicolumn"></td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor index-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Classes</strong></td></tr>
+    
+<tr><td class="decor index-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl>
+<dt class="heading-text"><a href="builtins.html#object">builtins.object</a>
+</dt><dd>
+<dl>
+<dt class="heading-text"><a href="mise.utils.project_repository.html#ProjectRepository">ProjectRepository</a>
+</dt></dl>
+</dd>
+</dl>
+ <p>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="ProjectRepository">class <strong>ProjectRepository</strong></a>(<a href="builtins.html#object">builtins.object</a>)</td></tr>
+    
+<tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
+<td class="decor title-decor" colspan=2><span class="code"><a href="#ProjectRepository">ProjectRepository</a>(db_path:&nbsp;'Path&nbsp;|&nbsp;str')<br>
+&nbsp;<br>
+Docstring&nbsp;for&nbsp;<a href="#ProjectRepository">ProjectRepository</a><br>
+&nbsp;<br>
+:var&nbsp;display_name:&nbsp;Description<br>
+:vartype&nbsp;display_name:&nbsp;Any<br>
+:var&nbsp;id:&nbsp;Description<br>
+:vartype&nbsp;id:&nbsp;Any<br>
+:var&nbsp;id:&nbsp;Description<br>
+:vartype&nbsp;id:&nbsp;Any<br>
+:var&nbsp;columns:&nbsp;Description<br>
+:vartype&nbsp;columns:&nbsp;id<br>&nbsp;</span></td></tr>
+<tr><td>&nbsp;</td>
+<td class="singlecolumn">Methods defined here:<br>
+<dl><dt><a name="ProjectRepository-__init__"><strong>__init__</strong></a>(self, db_path: 'Path | str')</dt><dd><span class="code">Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</span></dd></dl>
+
+<dl><dt><a name="ProjectRepository-add_code"><strong>add_code</strong></a>(self, label, parent_id=None, description='', color=None)</dt></dl>
+
+<dl><dt><a name="ProjectRepository-add_coded_segment"><strong>add_coded_segment</strong></a>(
+    self,
+    document_id: 'int',
+    code_id,
+    start_offset: 'int',
+    end_offset: 'int',
+    memo: 'str | None' = None
+) -&gt; 'int'</dt></dl>
+
+<dl><dt><a name="ProjectRepository-close"><strong>close</strong></a>(self) -&gt; 'None'</dt><dd><span class="code">#&nbsp;----&nbsp;lifecycle&nbsp;-------------------------------------------------</span></dd></dl>
+
+<dl><dt><a name="ProjectRepository-delete_code"><strong>delete_code</strong></a>(self, code_id)</dt></dl>
+
+<dl><dt><a name="ProjectRepository-delete_document"><strong>delete_document</strong></a>(self, document_id: 'int') -&gt; 'tuple[int, str | None]'</dt></dl>
+
+<dl><dt><a name="ProjectRepository-delete_segment"><strong>delete_segment</strong></a>(self, segment_id)</dt></dl>
+
+<dl><dt><a name="ProjectRepository-get_code_metadata"><strong>get_code_metadata</strong></a>(self, code_id: 'int')</dt></dl>
+
+<dl><dt><a name="ProjectRepository-get_code_usage_overview"><strong>get_code_usage_overview</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="ProjectRepository-get_coded_segments"><strong>get_coded_segments</strong></a>(self, document_id: 'int')</dt><dd><span class="code">#&nbsp;----&nbsp;coded_segments&nbsp;--------------------------------------------</span></dd></dl>
+
+<dl><dt><a name="ProjectRepository-get_document_by_text_path"><strong>get_document_by_text_path</strong></a>(self, text_path: 'Path') -&gt; 'Optional[Document]'</dt><dd><span class="code">Method&nbsp;doesn't&nbsp;make&nbsp;any&nbsp;sense.&nbsp;Only&nbsp;used&nbsp;in<br>
+DocumentBrowserWidget.populate_file_list<br>
+:return:</span></dd></dl>
+
+<dl><dt><a name="ProjectRepository-get_document_coding_overview"><strong>get_document_coding_overview</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="ProjectRepository-get_segment_at_position"><strong>get_segment_at_position</strong></a>(self, document_id, pos)</dt></dl>
+
+<dl><dt><a name="ProjectRepository-get_segments_for_code"><strong>get_segments_for_code</strong></a>(self, code_id: 'int')</dt></dl>
+
+<dl><dt><a name="ProjectRepository-list_codes"><strong>list_codes</strong></a>(self)</dt><dd><span class="code">Return&nbsp;all&nbsp;codes&nbsp;as&nbsp;sqlite&nbsp;Row&nbsp;objects.<br>
+Expected&nbsp;columns:&nbsp;id,&nbsp;label,&nbsp;parent_id,&nbsp;description,&nbsp;color,&nbsp;sort_order</span></dd></dl>
+
+<dl><dt><a name="ProjectRepository-lookup_code"><strong>lookup_code</strong></a>(self, code_id)</dt><dd><span class="code">lookup&nbsp;current&nbsp;code&nbsp;by&nbsp;id&nbsp;and&nbsp;return&nbsp;the&nbsp;current&nbsp;assigned&nbsp;values</span></dd></dl>
+
+<dl><dt><a name="ProjectRepository-lookup_document_id"><strong>lookup_document_id</strong></a>(self, text_path: 'Path') -&gt; 'int | None'</dt><dd><span class="code">Return&nbsp;document&nbsp;id&nbsp;by&nbsp;searching&nbsp;database&nbsp;with&nbsp;document&nbsp;path.<br>
+&nbsp;<br>
+:param&nbsp;text_path:&nbsp;Description<br>
+:type&nbsp;text_path:&nbsp;Path<br>
+:return:&nbsp;document&nbsp;id&nbsp;or&nbsp;None&nbsp;if&nbsp;no&nbsp;matching&nbsp;path<br>
+:rtype:&nbsp;int&nbsp;|&nbsp;None</span></dd></dl>
+
+<dl><dt><a name="ProjectRepository-next_code_sort_order"><strong>next_code_sort_order</strong></a>(self) -&gt; 'int'</dt></dl>
+
+<dl><dt><a name="ProjectRepository-register_document"><strong>register_document</strong></a>(self, original_filename: 'str', text_path: 'Path') -&gt; 'int'</dt><dd><span class="code">Creates&nbsp;new&nbsp;rows&nbsp;in&nbsp;documents&nbsp;table&nbsp;on&nbsp;file&nbsp;upload&nbsp;with<br>
+-&nbsp;file's&nbsp;original&nbsp;string&nbsp;name<br>
+-&nbsp;the&nbsp;path&nbsp;to&nbsp;text&nbsp;in&nbsp;the&nbsp;/texts&nbsp;dir<br>
+-&nbsp;generates&nbsp;and&nbsp;stores&nbsp;document&nbsp;UUID<br>
+&nbsp;<br>
+:param&nbsp;original_filename:&nbsp;File&nbsp;name&nbsp;on&nbsp;upload&nbsp;(user&nbsp;editable)<br>
+:type&nbsp;original_filename:&nbsp;str<br>
+:param&nbsp;text_path:&nbsp;path&nbsp;to&nbsp;doc&nbsp;in&nbsp;/texts&nbsp;dir,&nbsp;uses&nbsp;canonical&nbsp;name<br>
+:type&nbsp;text_path:&nbsp;Path<br>
+:return:&nbsp;Description<br>
+:rtype:&nbsp;int</span></dd></dl>
+
+<dl><dt><a name="ProjectRepository-rename_document_db"><strong>rename_document_db</strong></a>(self, new_display_name, document_id)</dt><dd><span class="code">Send&nbsp;new&nbsp;display&nbsp;name&nbsp;for&nbsp;document&nbsp;by&nbsp;document&nbsp;id&nbsp;in&nbsp;database<br>
+:&nbsp;returns:&nbsp;Count&nbsp;of&nbsp;rows&nbsp;changed</span></dd></dl>
+
+<dl><dt><a name="ProjectRepository-update_code"><strong>update_code</strong></a>(self, code_id, label, parent_id, description, color)</dt></dl>
+
+<hr>
+Readonly properties defined here:<br>
+<dl><dt><strong>connection</strong></dt>
+</dl>
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor data-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Data</strong></td></tr>
+    
+<tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><strong>log</strong> = &lt;Logger mise.utils.project_repository (WARNING)&gt;</td></tr></table>
+</body></html>

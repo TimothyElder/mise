@@ -90,7 +90,6 @@ class DocumentBrowserWidget(QWidget):
     def populate_file_list(self, directory: Path):
         """
         Populate the QListWidget with directories and files from the given directory.
-        `directory` is a Path.
         """
         directory = Path(directory)
         self.current_path = directory

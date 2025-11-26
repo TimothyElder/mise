@@ -5,7 +5,7 @@ from .metadata import initialize_metadata
 import logging
 log = logging.getLogger(__name__)
 
-def create_project(project_name: str, dirpath: str) -> Path:
+def init_project(project_name: str, dirpath: str) -> Path:
     """
     High-level project creation.
     Calls function that creates directory and touches off database

@@ -1,38 +1,23 @@
-"""
-Single source of truth for project state and views.
-
-At minimum, AppController should own:
-	•	Current project context
-	•	current_project_name: str | None
-	•	current_project_root: Path | None
-	•	current_repo: ProjectRepository | None
-	•	The “main” views for that project
-	•	_project_view: ProjectView | None
-	•	_analysis_view: AnalysisView | None
-
-And high-level operations:
-	•	create_project(name: str, base_dir: Path)
-	•	open_project(project_root: Path)
-	•	show_project_view()
-	•	show_analysis_view()
-"""
-
-from pathlib import Path
 import logging
 log = logging.getLogger(__name__)
 from typing import Optional
 from datetime import datetime
 from html import escape
 import webbrowser
+from pathlib import Path
 
 from PySide6.QtWidgets import QMainWindow, QMessageBox
 
 from .utils.project_repository import ProjectRepository
 from .projectview.project_window import ProjectView
 from .analysisview.analysis_window import AnalysisView
-from .project_init import create_project
+from .project_init import init_project
 
 class AppController:
+    """
+    Central program controller, handles all state changes and project life-cycle
+    functions.
+    """
     def __init__(self, main_window: QMainWindow):
         self.main_window = main_window
     
@@ -47,7 +32,16 @@ class AppController:
     # ---------- project lifecycle ----------
 
     def create_project(self, project_name: str, base_dir: Path):
-        project_root = create_project(project_name, str(base_dir))
+        """
+        Create Mise project, change current project state, switches main
+        widget to project view
+    
+        :param project_name: User inputted name.
+        :type project_name: str
+        :param base_dir: User selected directory where project stored.
+        :type base_dir: Path
+        """
+        project_root = init_project(project_name, str(base_dir))
         db_path = project_root / "project.db"
         repo = ProjectRepository(db_path)
         self._set_current_project(project_name, project_root, repo)
@@ -56,6 +50,13 @@ class AppController:
         log.info("Project %s created at %r.", project_name, project_root)
 
     def open_project(self, project_root: Path):
+        """
+        Open existing project, checking if .mise file in user selected directory.
+        Switches to project view.
+        
+        :param project_root: path to project directory
+        :type project_root: Path
+        """
         if not project_root.is_dir():
             QMessageBox.warning(self.main_window, "Invalid project", "The selected path is not a directory.")
             return
@@ -80,6 +81,16 @@ class AppController:
         self.show_project_view()
 
     def _set_current_project(self, name: str, root: Path, repo: ProjectRepository):
+        """
+        Changes current state attributes to newly created or selected project.
+        
+        :param name: User inputted project name
+        :type name: str
+        :param root: Path object to project directory
+        :type root: Path
+        :param repo: Include database handler class
+        :type repo: ProjectRepository
+        """
         self.current_project_name = name
         self.current_project_root = root
         self.current_repo = repo
@@ -144,107 +155,90 @@ class AppController:
     # ---------- reports ------------------------------
 
     def generate_report(self, report_data: list[dict]):
-            """
-            report_data = [
-                {
-                    "code": {
-                        "id": int,
-                        "label": str,
-                        "color": str,
-                        "segment_count": int,
-                        "document_count": int,
-                    },
-                    "segments": [
-                        {
-                            "document_id": int,
-                            "display_name": str,
-                            "text_path": str,
-                            "start_offset": int,
-                            "end_offset": int
-                        },
-                        ...
-                    ]
-                },
-                ...
-            ]
-            """
+        """
+        Export HTML code report from selected codes, open report in default browser.
+        
+        :param self: Description
+        :param report_data: List of dictionaries containing code and segment info
+        :type report_data: list[dict]
+        """
 
-            if not report_data:
-                log.warning("generate_report called with empty report_data.")
-                return
+        if not report_data:
+            log.warning("generate_report called with empty report_data.")
+            return
 
-            # --------------------------------------------
-            # 1. Load HTML template
-            # --------------------------------------------
-            template_path = (
-                Path(__file__).resolve().parent
-                / "assets"
-                / "templates"
-                / "template.html"
+        # --------------------------------------------
+        # 1. Load HTML template
+        # --------------------------------------------
+        template_path = (
+            Path(__file__).resolve().parent
+            / "assets"
+            / "templates"
+            / "template.html"
+        )
+
+        try:
+            template = template_path.read_text(encoding="utf-8")
+        except FileNotFoundError:
+            log.error("AppController.generate_report: Template not found at %r", template_path)
+            return
+
+        # --------------------------------------------
+        # 2. Generate report body (inner HTML)
+        # --------------------------------------------
+        project_name = escape(getattr(self, "current_project_name", "Unknown Project"))
+        body_parts = []
+
+        for entry in report_data:
+            code = entry["code"]
+            segments = entry["segments"]
+
+            code_label = escape(code["label"])
+            code_color = escape(code.get("color") or "#cccccc")
+            segment_count = code.get("segment_count", len(segments))
+            document_count = code.get("document_count", None)
+
+            # ----- Code header block -----
+            body_parts.append(
+                f"<section>\n"
+                f"<h2><span class='code-badge' "
+                f"style='border-color:{code_color};background:{code_color}22;'>"
+                f"{code_label}</span></h2>\n"
+                f"<p>Project: {project_name}</p>\n"
+                f"<p>Segments: {segment_count}"
+                + (f" | Documents: {document_count}</p>\n" if document_count else "</p>\n")
             )
 
-            try:
-                template = template_path.read_text(encoding="utf-8")
-            except FileNotFoundError:
-                log.error("Template not found at %r", template_path)
-                return
+            # ----- Group segments by document -----
+            docs = {}
+            for seg in segments:
+                doc = seg["display_name"]
+                docs.setdefault(doc, []).append(seg)
 
-            # --------------------------------------------
-            # 2. Generate report body (inner HTML)
-            # --------------------------------------------
-            project_name = escape(getattr(self, "current_project_name", "Unknown Project"))
-            body_parts = []
+            # ----- Write segments for each document -----
+            for doc_name, seg_list in docs.items():
+                body_parts.append(f"<h3>{escape(doc_name)}</h3>\n")
 
-            for entry in report_data:
-                code = entry["code"]
-                segments = entry["segments"]
+                for seg in seg_list:
+                    path = seg["text_path"]
+                    start = seg["start_offset"]
+                    end = seg["end_offset"]
 
-                code_label = escape(code["label"])
-                code_color = escape(code.get("color") or "#cccccc")
-                segment_count = code.get("segment_count", len(segments))
-                document_count = code.get("document_count", None)
+                    try:
+                        content = Path(path).read_text(encoding="utf-8")
+                        snippet = escape(content[start:end].strip())
+                    except Exception as e:
+                        snippet = "[Error reading snippet]"
+                        log.warning(f"Error reading snippet for {path}: {e}")
 
-                # ----- Code header block -----
-                body_parts.append(
-                    f"<section>\n"
-                    f"<h2><span class='code-badge' "
-                    f"style='border-color:{code_color};background:{code_color}22;'>"
-                    f"{code_label}</span></h2>\n"
-                    f"<p>Project: {project_name}</p>\n"
-                    f"<p>Segments: {segment_count}"
-                    + (f" | Documents: {document_count}</p>\n" if document_count else "</p>\n")
-                )
+                    body_parts.append(
+                        "<div class='segment'>\n"
+                        f"  <div class='segment-header'>Offsets: {start}–{end} | Path: {escape(path)}</div>\n"
+                        f"  <div class='snippet'>{snippet}</div>\n"
+                        "</div>\n"
+                    )
 
-                # ----- Group segments by document -----
-                docs = {}
-                for seg in segments:
-                    doc = seg["display_name"]
-                    docs.setdefault(doc, []).append(seg)
-
-                # ----- Write segments for each document -----
-                for doc_name, seg_list in docs.items():
-                    body_parts.append(f"<h3>{escape(doc_name)}</h3>\n")
-
-                    for seg in seg_list:
-                        path = seg["text_path"]
-                        start = seg["start_offset"]
-                        end = seg["end_offset"]
-
-                        try:
-                            content = Path(path).read_text(encoding="utf-8")
-                            snippet = escape(content[start:end].strip())
-                        except Exception as e:
-                            snippet = "[Error reading snippet]"
-                            log.warning(f"Error reading snippet for {path}: {e}")
-
-                        body_parts.append(
-                            "<div class='segment'>\n"
-                            f"  <div class='segment-header'>Offsets: {start}–{end} | Path: {escape(path)}</div>\n"
-                            f"  <div class='snippet'>{snippet}</div>\n"
-                            "</div>\n"
-                        )
-
-                body_parts.append("</section>\n")
+            body_parts.append("</section>\n")
 
             body_html = "".join(body_parts)
             

@@ -1,22 +1,25 @@
 # mise.spec
+import sys
 from pathlib import Path
 from PyInstaller.utils.hooks import collect_submodules
-from PyInstaller.utils.hooks import collect_submodules
 from PyInstaller.building.build_main import Analysis, PYZ, EXE, BUNDLE
+import os
 
 # PyInstaller does not set __file__ — use cwd instead (build script cds to project root)
 project_root = Path(os.getcwd()).resolve()
 src_dir = project_root / "src"
 
+assets_src = src_dir / "mise" / "assets"
+
+if sys.platform == "win32":
+    icon_file = assets_src / "mise.ico"
+else:
+    icon_file = assets_src /  "mise.icns"
+
 block_cipher = None
 
 # Include all mise submodules
 hidden_imports = collect_submodules("mise")
-
-# Assets directory
-assets_src = src_dir / "mise" / "assets"
-
-icon_file = assets_src / "mise.icns"
 
 # datas must be a sequence of 2-tuples: (source, target-relative-dir)
 datas = [
@@ -58,11 +61,13 @@ exe = EXE(
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
+    icon=str(icon_file),
 )
 
-app = BUNDLE(
-    exe,
-    name="Mise.app",
-    icon=str(icon_file),
-    bundle_identifier="org.mise.qda",
-)
+if sys.platform == "darwin":
+    app = BUNDLE(
+        exe,
+        name="Mise.app",
+        icon=str(icon_file),
+        bundle_identifier="org.mise.qda",
+    )

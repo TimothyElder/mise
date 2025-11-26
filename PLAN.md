@@ -157,40 +157,33 @@ Advanced users may want to have the option to script functionality in Mise as we
 ## Dev Notes and `todo`
 
 ### `todo`
+**Priority/Breaking/Bugs**
+- Text paths in database are pointing to wrong location if user moves the project directory.
 - need to clean up the implementation of `extract_text_from_pdf` in `src/mise/utils/file_io.py`.
 - add PDF reading and conversion to `mise/utils/file_io.py` with function `read_pdf`
-- Eventually, need to get a pyinstaller instance installed.
-- Need to get the UI options set up, including increasing font size.
-- Memoing feature, perhaps in the AnalysisWidget, and in the ProjectWidget maybe when in the document tree, a right click allows an option to open document in memo mode which allows for a two panel window where on the left is the document and on the right a text editor where you can memo.
-- For analysis widget, should include an option that automatically adds to the segment which is to say expands the text selection from the document to include more context. And need some function to pull up the document from a segment.
-- Folder icons not appearing in file browser
+**Feature Dev**
+- UI settings including font support, increase/descrease font size, dark mode, App styling
+- Memoing feature, when in the document tree in AnalysisView, a right click allows an option to open document in memo two panel mode.
+- Rebasing database (does this solve broken paths on project directory move)
+- Keyboard shortcuts, "Command + N" → "Create New Project", "Command + O" → "Open Project"
+- Packaging Tectonic with the software
+**Sometime**
 - Alembic versioning style with published schema for database
 - On project creation need to add something in the root directory for the project that clearly indicates that the directory is a project file such as including a `.mise` file that has some information about under what version of the program the project was made and the author.
 - For packaging the app need to set `setup_logging(..., level=logging.INFO)` in the `app.py` file.
 - extract project creation flow into helper method `_handle_create_new_project_requested`, because UI ↔ filesystem ↔ repo should not live in one function
-- add redaction functionality
-- add font support
+- Redaction functionality in ProjectView
+- For analysis widget, should include an option that automatically adds to the segment which is to say expands the text selection from the document to include more context. And need some function to pull up the document from a segment.
+
 
 ### Proposed Order of Development
 
-1.	Data Manager (Backend)
-    - Define how documents and codes will be stored and retrieved.
-    - Decide whether to use JSON, SQLite, or another format.
-    - Implement basic CRUD operations for documents and codes.
-    - Example: A Project class that manages documents and a Code class to store and handle codes.
-    - What database to use?
-2.	Text Processing
+1.	Text Processing
     - Implement logic for tagging and calculating co-occurrence relationships between codes.
     - This is also where algorithms for analyzing text (e.g., tokenization, counting) will live.
-3.	Visualization Logic
+2.	Visualization Logic
     - Start with co-occurrence data structures and test generating NetworkX graphs from them.
     - Ensure the backend produces data that can easily plug into a visualization.
-4.	Basic GUI Skeleton
-    - Create a minimal GUI (main window, menus, placeholders) to test interactions with the backend.
-    - Example: A basic interface to upload a document and view its contents.
-5.	Incremental GUI Features
-    - Build and connect each GUI feature to the backend step by step.
-    - Start with simple document management and then add more complex functionality like tagging and visualization.
 
 ### Development Helpers
 

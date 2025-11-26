@@ -8,6 +8,18 @@ import logging
 log = logging.getLogger(__name__)
 
 class ProjectRepository:
+    """
+    Docstring for ProjectRepository
+    
+    :var display_name: Description
+    :vartype display_name: Any
+    :var id: Description
+    :vartype id: Any
+    :var id: Description
+    :vartype id: Any
+    :var columns: Description
+    :vartype columns: id
+    """
     def __init__(self, db_path: Path | str):
         self.db_path = Path(db_path)
         self.conn = sqlite3.connect(self.db_path)
@@ -19,6 +31,20 @@ class ProjectRepository:
 
     # ---- documents -------------------------------------------------
     def register_document(self, original_filename: str, text_path: Path) -> int:
+        """
+        Creates new rows in documents table on file upload with
+        - file's original string name
+        - the path to text in the /texts dir
+        - generates and stores document UUID
+        
+        :param original_filename: File name on upload (user editable)
+        :type original_filename: str
+        :param text_path: path to doc in /texts dir, uses canonical name
+        :type text_path: Path
+        :return: Description
+        :rtype: int
+        """
+
         cur = self.conn.execute(
             "INSERT INTO documents (original_filename, display_name, text_path, created_at, doc_uuid) "
             "VALUES (?, ?, ?, datetime('now'), ?)",
@@ -28,6 +54,14 @@ class ProjectRepository:
         return cur.lastrowid
 
     def lookup_document_id(self, text_path: Path) -> int | None:
+        """
+        Return document id by searching database with document path.
+        
+        :param text_path: Description
+        :type text_path: Path
+        :return: document id or None if no matching path
+        :rtype: int | None
+        """
         row = self.conn.execute(
             "SELECT id FROM documents WHERE text_path = ?",
             (str(text_path),),
@@ -35,6 +69,12 @@ class ProjectRepository:
         return row["id"] if row else None
     
     def get_document_by_text_path(self, text_path: Path) -> Optional[Document]:
+        """
+        Method doesn't make any sense. Only used in
+        DocumentBrowserWidget.populate_file_list
+        :return: 
+        """
+        print(text_path)
         cur = self.conn.execute(
             "SELECT id, display_name FROM documents WHERE text_path = ?",
             (str(text_path),),
@@ -43,7 +83,6 @@ class ProjectRepository:
         return row
     
     def delete_document(self, document_id: int) -> tuple[int, str | None]:
-        print(f"[DB] delete_document called with document_id={document_id!r}")
 
         # Get text_path before deletion
         cur = self.conn.execute(
@@ -67,13 +106,14 @@ class ProjectRepository:
         )
         self.conn.commit()
 
-        print(
-            f"[DB] deleted {cur_segments.rowcount} coded_segments, "
-            f"{cur_docs.rowcount} documents"
-        )
+        log.info("[DB] Deleting document document_id=%s from database and texts_dir, %d coded_segments", document_id, cur_segments.rowcount)
         return cur_docs.rowcount, text_path
 
     def rename_document_db(self, new_display_name, document_id):
+        """
+        Send new display name for document by document id in database
+        : returns: Count of rows changed
+        """
         
         cur = self.conn.execute(
             """
@@ -85,13 +125,14 @@ class ProjectRepository:
         )
         self.conn.commit()
 
-        print(cur.rowcount)
+        log.info("[DB] rename_document_db: %d rows changed by rename_document_db", cur.rowcount)
+
         return cur.rowcount
     
     # ---- codes ------------------------------------------------------
     def lookup_code(self, code_id):
         """
-        lookup current code by its id and return the assigned values
+        lookup current code by id and return the current assigned values
         """
         row = self.conn.execute(
             """
@@ -103,7 +144,8 @@ class ProjectRepository:
         ).fetchone()
 
         if row is None:
-            print(f"NO CODE matching ID == {code_id}")
+            log.error("[DB] lookup_code: NO CODE matching ID == %d", code_id)
+            
         return(row)
     
     def list_codes(self):
