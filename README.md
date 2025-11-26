@@ -33,16 +33,19 @@
 ## Installation
 
 ### macOS
-1. Download `Mise-0.1.0.dmg` from the Releases page.
-2. Open it and drag `Mise.app` to your Applications folder.
-3. On first run, you may need to right-click → Open due to macOS Gatekeeper.
+
+1. Go to the [Releases page](https://github.com/TimothyElder/mise/releases).
+2. Download the file named `Mise-0.1.0.dmg`.
+3. Open the DMG and drag `Mise.app` into your Applications folder.
+4. On first run, you may need to right-click → Open due to macOS Gatekeeper.
 
 ### Windows
-1. Download `Mise-0.1.0-setup.exe` from the Releases page.
-2. Run the installer and follow the prompts.
-3. Launch Mise from the Start Menu.
 
-See [releases](https://github.com/TimothyElder/mise/releases) for full installation instructions.
+1. Go to the [Releases page](https://github.com/TimothyElder/mise/releases).
+2. Download the file named `Mise-0.1.0-setup.exe`.
+3. Run the installer and follow the prompts.
+
+### Install from source
 
 On macOS you can install from source:
 
@@ -52,7 +55,6 @@ cd mise
 make install
 make build-macos
 # dist/Mise.app appears
-
 ```
 
 ## Usage
