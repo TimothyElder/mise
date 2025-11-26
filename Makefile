@@ -3,8 +3,8 @@
 # Detect OS
 ifeq ($(OS),Windows_NT)
     PYTHON = python3
-    VENV_PYTHON = .venv/Scripts/python.exe
-    VENV_PIP    = .venv/Scripts/pip.exe
+    VENV_PYTHON = .\.venv\Scripts\python.exe
+    VENV_PIP    = .\.venv\Scripts\pip.exe
 else
     PYTHON = python3
     VENV_PYTHON = .venv/bin/python

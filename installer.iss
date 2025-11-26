@@ -12,6 +12,7 @@ Compression=lzma
 SolidCompression=yes
 DisableDirPage=no
 DisableProgramGroupPage=no
+SetupIconFile=src\mise\assets\mise.ico
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"

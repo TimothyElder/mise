@@ -159,8 +159,6 @@ Advanced users may want to have the option to script functionality in Mise as we
 ### `todo`
 **Priority/Breaking/Bugs**
 - Text paths in database are pointing to wrong location if user moves the project directory.
-- need to clean up the implementation of `extract_text_from_pdf` in `src/mise/utils/file_io.py`.
-- add PDF reading and conversion to `mise/utils/file_io.py` with function `read_pdf`
 **Feature Dev**
 - UI settings including font support, increase/descrease font size, dark mode, App styling
 - Memoing feature, when in the document tree in AnalysisView, a right click allows an option to open document in memo two panel mode.

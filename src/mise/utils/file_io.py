@@ -37,6 +37,8 @@ def extract_text_from_pdf(path: Path) -> str:
         for page in pdf.pages:
             text = page.extract_text() or ""
             chunks.append(text)
+
+    log.info("extract_text_from_pdf: extracted content from %r", path)
     # Normalize to Unix line endings
     return "\n\n".join(chunks).replace("\r\n", "\n").replace("\r", "\n")
 
@@ -47,6 +49,7 @@ def extract_text_from_docx(path: Path) -> str:
     doc = DocxDocument(str(path))
     paragraphs = [p.text for p in doc.paragraphs]
     text = "\n\n".join(paragraphs)
+    log.info("extract_text_from_docx: extracted content from %r", path)
     return text.replace("\r\n", "\n").replace("\r", "\n")
 
 def extract_text_from_doc(path: Path) -> str:
@@ -55,28 +58,5 @@ def extract_text_from_doc(path: Path) -> str:
 
 def extract_text_from_markdown(path: Path) -> str:
     text = path.read_text(encoding="utf-8")
+    log.info("extract_text_from_markdown: extracted content from %r", path)
     return text.replace("\r\n", "\n").replace("\r", "\n")
-
-def read_docx(filepath):
-    """
-    Reads a DOCX file and returns its text content.
-    """
-    doc = DocxDocument(filepath)
-    return "\n".join([p.text for p in doc.paragraphs])
-
-def read_markdown(filepath):
-    """Reads a Markdown file and returns its plain text content."""
-    with open(filepath, "r") as f:
-        return f.read()
-
-def load_document(filepath):
-    """Detects file type and loads the document."""
-    _, ext = os.path.splitext(filepath)
-    if ext.lower() == ".docx":
-        return read_docx(filepath)
-    elif ext.lower() in [".md", ".markdown"]:
-        return read_markdown(filepath)
-    else:
-        raise ValueError(f"Unsupported file type: {ext}")
-
-
