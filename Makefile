@@ -38,6 +38,7 @@ venv: $(VENV)
 install:
 	$(PYTHON) -m venv .venv
 	$(VENV_PIP) install --upgrade pip
+	$(VENV_PIP) install pyinstaller
 	$(VENV_PIP) install -e .
 
 run: install
@@ -49,7 +50,7 @@ dev: install
 build-macos: install
 	./scripts/build-macos.sh
 
-build-windows:
+build-windows: install
 	$(VENV_PYTHON) -m PyInstaller mise.spec
 
 test: install
