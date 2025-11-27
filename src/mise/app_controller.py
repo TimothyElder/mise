@@ -43,13 +43,14 @@ class AppController:
         """
         project_root = init_project(project_name, str(base_dir))
         db_path = project_root / "project.db"
-        repo = ProjectRepository(db_path)
+        texts_dir = project_root / "texts"
+        repo = ProjectRepository(db_path, texts_dir)
         self._set_current_project(project_name, project_root, repo)
         self._create_project_view_if_needed()
         self.show_project_view()
         log.info("Project %s created at %r.", project_name, project_root)
 
-    def open_project(self, project_root: Path):
+    def open_project(self, project_root: Path, texts_dir: Path):
         """
         Open existing project, checking if .mise file in user selected directory.
         Switches to project view.
@@ -74,7 +75,7 @@ class AppController:
             project_name = project_name[:-5]
 
         db_path = project_root / "project.db"
-        repo = ProjectRepository(db_path)
+        repo = ProjectRepository(db_path, texts_dir)
 
         self._set_current_project(project_name, project_root, repo)
         self._create_project_view_if_needed()

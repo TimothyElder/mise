@@ -3,8 +3,6 @@
 import logging
 log = logging.getLogger(__name__)
 
-from pathlib import Path
-
 from PySide6.QtWidgets import (
     QWidget,
     QVBoxLayout,
@@ -21,8 +19,6 @@ from ..utils.project_repository import ProjectRepository
 DOC_ID_ROLE = Qt.UserRole + 1
 START_ROLE = Qt.UserRole + 2
 END_ROLE = Qt.UserRole + 3
-PATH_ROLE = Qt.UserRole + 4
-
 
 class SegmentCardWidget(QWidget):
     """
@@ -74,7 +70,7 @@ class CodeSegmentView(QWidget):
     Shows all segments coded with that code across documents as cards.
     """
 
-    segmentActivated = Signal(int, int, int, object)
+    segmentActivated = Signal(int, int, int)
     # document_id, start_offset, end_offset, text_path
 
     def __init__(self, repo: ProjectRepository, parent=None):
@@ -97,7 +93,10 @@ class CodeSegmentView(QWidget):
         self.list.clear()
 
     def get_text_snippet(self, text_path: str, start_offset: int, end_offset: int) -> str:
-        content = Path(text_path).read_text(encoding="utf-8")
+        # text_path is the DB path (now relative); resolve it against the repo's texts_dir
+        abs_path = (self.repo.texts_dir / text_path).resolve()
+
+        content = abs_path.read_text(encoding="utf-8")
         snippet = content[start_offset:end_offset]
         return snippet.strip()
 
@@ -130,7 +129,6 @@ class CodeSegmentView(QWidget):
             item.setData(DOC_ID_ROLE, seg["document_id"])
             item.setData(START_ROLE, start)
             item.setData(END_ROLE, end)
-            item.setData(PATH_ROLE, text_path)
 
             item.setSizeHint(card.sizeHint())
 
@@ -141,9 +139,8 @@ class CodeSegmentView(QWidget):
         doc_id = item.data(DOC_ID_ROLE)
         start = item.data(START_ROLE)
         end = item.data(END_ROLE)
-        path = item.data(PATH_ROLE)
 
         if doc_id is None or start is None or end is None:
             return
 
-        self.segmentActivated.emit(doc_id, start, end, path)
+        self.segmentActivated.emit(doc_id, start, end)

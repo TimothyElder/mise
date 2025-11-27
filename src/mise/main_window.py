@@ -150,8 +150,9 @@ class MainWindow(QMainWindow):
             return  # user cancelled
 
         project_root = Path(dirpath_str)
+        print(project_root)
 
-        self.controller.open_project(project_root = project_root)
+        self.controller.open_project(project_root = project_root, texts_dir = project_root / "texts" )
 
     def _handle_show_about_dialog(self):
         QMessageBox.about(
