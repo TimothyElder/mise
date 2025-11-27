@@ -7,7 +7,7 @@
 
 [Mise](https://en.wikipedia.org/wiki/Mise_en_place) is an open source qualitative data analysis tool that preserves all your data in open formats, emphasizes reproducibility of coding schemes, and is a no cost alternative to proprietary CAQDA software. It is designed to preserve the rich functionality of CAQDA software like atlas.ti or Dedoose while having no cost and a more straightforward design.
 
-**Version:** 0.1.0 (Alpha)
+**Version:** 0.1.1 (Alpha)
 
 **Status:** Early-stage, expect breaking changes.
 
@@ -35,14 +35,14 @@
 ### macOS
 
 1. Go to the [Releases page](https://github.com/TimothyElder/mise/releases).
-2. Download the file named `Mise-0.1.0.dmg`.
+2. Download the file named `Mise-0.1.1.dmg`.
 3. Open the DMG and drag `Mise.app` into your Applications folder.
 4. On first run, you may need to right-click → Open due to macOS Gatekeeper.
 
 ### Windows
 
 1. Go to the [Releases page](https://github.com/TimothyElder/mise/releases).
-2. Download the file named `Mise-0.1.0-setup.exe`.
+2. Download the file named `Mise-0.1.1-setup.exe`.
 3. Run the installer and follow the prompts.
 
 ### Install from source

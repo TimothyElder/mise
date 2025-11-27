@@ -3,11 +3,11 @@
 [Setup]
 AppId={{fa98809b-2fa6-4884-88b7-4cc33e314996}
 AppName=Mise
-AppVersion=0.1.0
+AppVersion=0.1.1
 AppPublisher=Timothy Elder
 DefaultDirName={pf}\Mise
 DefaultGroupName=Mise
-OutputBaseFilename=Mise-0.1.0-setup
+OutputBaseFilename=Mise-0.1.1-setup
 Compression=lzma
 SolidCompression=yes
 DisableDirPage=no
