@@ -20,8 +20,10 @@ class ProjectRepository:
     :var columns: Description
     :vartype columns: id
     """
-    def __init__(self, db_path: Path | str):
+    def __init__(self, db_path: Path | str, texts_dir: Path):
         self.db_path = Path(db_path)
+        self.texts_dir = Path(texts_dir)
+
         self.conn = sqlite3.connect(self.db_path)
         self.conn.row_factory = sqlite3.Row
 
@@ -44,11 +46,21 @@ class ProjectRepository:
         :return: Description
         :rtype: int
         """
+        log.info(
+            "register_document: Registering %s with text_path=%r",
+            original_filename, text_path
+        )
+
+        rel_path = self._to_rel_path(text_path)
 
         cur = self.conn.execute(
-            "INSERT INTO documents (original_filename, display_name, text_path, created_at, doc_uuid) "
-            "VALUES (?, ?, ?, datetime('now'), ?)",
-            (original_filename, original_filename, str(text_path), str(uuid.uuid4())),
+            """
+            INSERT INTO documents (
+                original_filename, display_name, text_path, created_at, doc_uuid
+            )
+            VALUES (?, ?, ?, datetime('now'), ?)
+            """,
+            (original_filename, original_filename, rel_path, str(uuid.uuid4())),
         )
         self.conn.commit()
         return cur.lastrowid
@@ -62,25 +74,35 @@ class ProjectRepository:
         :return: document id or None if no matching path
         :rtype: int | None
         """
+        rel = self._to_rel_path(text_path)
         row = self.conn.execute(
             "SELECT id FROM documents WHERE text_path = ?",
-            (str(text_path),),
+            (rel,),
         ).fetchone()
         return row["id"] if row else None
     
-    def get_document_by_text_path(self, text_path: Path) -> Optional[Document]:
+    def get_document_by_text_path(self, text_path: Path):
         """
         Method doesn't make any sense. Only used in
         DocumentBrowserWidget.populate_file_list
         :return: 
         """
-        print(text_path)
+        rel = self._to_rel_path(text_path)
         cur = self.conn.execute(
             "SELECT id, display_name FROM documents WHERE text_path = ?",
-            (str(text_path),),
+            (rel,),
         )
         row = cur.fetchone()
         return row
+    
+    def get_document_path(self, document_id: int) -> Path:
+        row = self.conn.execute(
+            "SELECT text_path FROM documents WHERE id = ?",
+            (document_id,),
+        ).fetchone()
+        if row is None:
+            raise KeyError(f"No document with id {document_id}")
+        return self._abs_from_db(row["text_path"])
     
     def delete_document(self, document_id: int) -> tuple[int, str | None]:
 
@@ -107,7 +129,7 @@ class ProjectRepository:
         self.conn.commit()
 
         log.info("[DB] Deleting document document_id=%s from database and texts_dir, %d coded_segments", document_id, cur_segments.rowcount)
-        return cur_docs.rowcount, text_path
+        return cur_docs.rowcount, self.texts_dir / text_path
 
     def rename_document_db(self, new_display_name, document_id):
         """
@@ -375,6 +397,32 @@ class ProjectRepository:
         if row is None:
             return None
         return dict(row)
+    
+    # ---- internal path helpers ------------------------------------
+    def _to_rel_path(self, path: Path) -> str:
+        """Store paths as POSIX-style relative paths under texts_dir."""
+        path = Path(path)
+        if path.is_absolute():
+            try:
+                rel = path.relative_to(self.texts_dir)
+            except ValueError:
+                log.warning(
+                    "Path %r is not under texts_dir %r; storing as-is",
+                    path, self.texts_dir
+                )
+                return path.as_posix()
+        else:
+            # assume already relative to texts_dir
+            rel = path
+        return rel.as_posix()
+
+    def _abs_from_db(self, path_str: str) -> Path:
+        """Resolve stored (relative) DB path to an absolute filesystem path."""
+        p = Path(path_str)
+        if p.is_absolute():
+            # defensive: old data or bugs
+            return p
+        return (self.texts_dir / p).resolve()
 
     # ---- lifecycle -------------------------------------------------
     def close(self) -> None:

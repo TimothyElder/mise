@@ -82,18 +82,29 @@ class ProjectView(QWidget):
         
     def on_document_activated(self, path: Path):
         # Ensure we always work with Path inside
-        path = Path(path)
+        abs_path = self._resolve_text_path(path)
 
         # Look up document id for this path
-        doc_id = self.repo.lookup_document_id(path)
+        doc_id = self.repo.lookup_document_id(abs_path)
         if doc_id is None:
-            log.warning("No document id for path %r", path)
+            log.warning("No document id for path %r", abs_path)
         else:
-            log.info("Activated document_id=%s for %r", doc_id, path)
+            log.info("Activated document_id=%s for %r", doc_id, abs_path)
 
         # Push state into the viewer
         self.file_viewer_widget.current_document_id = doc_id
 
         # Show content and refresh highlights for that doc
-        self.file_viewer_widget.display_file_content(path)
+        self.file_viewer_widget.display_file_content(abs_path)
         self.file_viewer_widget.refresh_highlights()
+
+    def _resolve_text_path(self, path: Path | str) -> Path:
+        """
+        Normalize a path coming from the UI / signals into an absolute path
+        under this project's texts_dir.
+        """
+        p = Path(path)
+        if p.is_absolute():
+            return p
+        # treat it as a DB-style relative path under texts_dir
+        return (self.texts_dir / p).resolve()

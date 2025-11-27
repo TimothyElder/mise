@@ -118,9 +118,11 @@ class AnalysisView(QWidget):
         self.stacked.setCurrentIndex(self.PAGE_CODE_SEGMENTS)
 
     def _on_document_selected(self, text_path: str, doc_id: int):
-        text_path = Path(text_path)
+        # text_path is the DB value (now relative); resolve it to an absolute path
+        abs_path = (self.repo.texts_dir / text_path).resolve()
+
         self.show_document_page()
-        self.document_view.display_file_content(text_path)
+        self.document_view.display_file_content(abs_path)
         self.document_view.current_document_id = doc_id
         self.document_view.refresh_highlights()
 
@@ -128,11 +130,11 @@ class AnalysisView(QWidget):
         self.show_code_segments_page()
         self.code_segment_view.load_segments_for_code(code_id)
     
-    def _on_segment_activated(self, doc_id: int, start: int, end: int, text_path: str):
+    def _on_segment_activated(self, doc_id: int, start: int, end: int):
         # Switch to document page
         self.show_document_page()
+        path = self.repo.get_document_path(doc_id)
 
-        path = Path(text_path)
         self.document_view.display_file_content(path)
         self.document_view.current_document_id = doc_id
 

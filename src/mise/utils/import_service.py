@@ -18,7 +18,7 @@ def import_files(src_paths: list[Path], texts_dir: Path, repo) -> tuple[bool, li
 
         try:
             text = convert_to_canonical_text(src_path)
-            dest_path = allocate_text_path(texts_dir)
+            dest_path = allocate_text_name(texts_dir)
             dest_path.write_text(text, encoding="utf-8")
             repo.register_document(src_path.name, dest_path)
             imported_any = True
@@ -27,7 +27,10 @@ def import_files(src_paths: list[Path], texts_dir: Path, repo) -> tuple[bool, li
 
     return imported_any, errors
 
-def allocate_text_path(texts_dir: Path) -> Path:
+def allocate_text_name(texts_dir: Path) -> Path:
     existing = list(texts_dir.glob("doc-*.txt"))
+    print(existing)
     next_id = len(existing) + 1
+
+    log.info("allocate_text_name: allocating %s", f"doc-{next_id:04d}.txt")
     return texts_dir / f"doc-{next_id:04d}.txt"
