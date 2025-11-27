@@ -9,9 +9,14 @@ from .main_window import MainWindow
 from .utils.logging_config import setup_logging
 from .utils.paths import asset_path
 
+
 def run():
     setup_logging(Path.home() / ".mise", level=logging.DEBUG)
     app = QApplication(sys.argv)
+    
+    # with open("src/mise/assets/styles.qss", "r") as f:
+    #     _style = f.read()
+    #     app.setStyleSheet(_style)
 
     icon = QIcon(str(asset_path("mise-icon.png")))
     app.setWindowIcon(icon)
@@ -19,7 +24,7 @@ def run():
     app.setDesktopFileName("Mise")
     app.setApplicationName("Mise")
     app.setApplicationVersion("0.1.1")
-    app.setOrganizationDomain("https://miseqda.come")
+    app.setOrganizationDomain("https://miseqda.com")
 
     window = MainWindow()
     window.show()

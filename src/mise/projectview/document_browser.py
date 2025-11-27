@@ -39,10 +39,10 @@ class DocumentBrowserWidget(QWidget):
 
         layout = QVBoxLayout(self)
 
-        self.back_button = QPushButton("Back")
-        self.back_button.clicked.connect(self.go_back)
-        self.back_button.setEnabled(False)  # Initially disabled at root directory
-        layout.addWidget(self.back_button)
+        # self.back_button = QPushButton("Back")
+        # self.back_button.clicked.connect(self.go_back)
+        # self.back_button.setEnabled(False)  # Initially disabled at root directory
+        # layout.addWidget(self.back_button)
 
         self.file_list = QListWidget()
         self.populate_file_list(self.current_path)
@@ -97,7 +97,7 @@ class DocumentBrowserWidget(QWidget):
         self.file_list.clear()
 
         # Enable or disable the back button based on directory
-        self.back_button.setEnabled(self.current_path != self.project_root)
+        # self.back_button.setEnabled(self.current_path != self.project_root)
 
         folder_icon = QIcon(asset_path("folder.png"))
         file_icon = QIcon(asset_path("document.png"))

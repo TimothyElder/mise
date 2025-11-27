@@ -7,9 +7,12 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import QDir
 
+from PySide6.QtGui import QAction
+
 from .widgets.welcome_widget import WelcomeWidget
 from .widgets.report_dialog import CodeReportDialog
 from .app_controller import AppController
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -17,11 +20,11 @@ class MainWindow(QMainWindow):
         
         self.controller = AppController(self)
 
+        self._create_actions()
+        self._create_menu_bar()
+
         self.setWindowTitle("Open Source Qualitative Data Analysis")
         self.resize(800, 600)
-
-        # Create the menu bar
-        self._create_menu_bar()
 
         # Set up the welcome widget
         welcome = WelcomeWidget()
@@ -55,36 +58,67 @@ class MainWindow(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Error", str(e))
             log.error("Error creating project named %s at %r: %s", project_name, dirpath, e)
+    
+    def _create_actions(self):
+        # File
+        self.action_new_project = QAction("Create New Project", self)
+        self.action_new_project.triggered.connect(self._handle_create_new_project_requested)
+
+        self.action_open_project = QAction("Open Project", self)
+        self.action_open_project.triggered.connect(self._handle_open_project_requested)
+
+        # View
+        self.action_open_analysis = QAction("Open Analysis View", self)
+        self.action_open_analysis.triggered.connect(self._handle_open_analysis_requested)
+
+        self.action_open_project_view = QAction("Open Project View", self)
+        self.action_open_project_view.triggered.connect(self._handle_project_view_requested)
+
+        # Reports
+        self.action_generate_report = QAction("Generate Code Report", self)
+        self.action_generate_report.triggered.connect(self._handle_generate_report_requested)
+
+        # Help
+        self.action_about = QAction("About Mise", self)
+        self.action_about.triggered.connect(self._handle_show_about_dialog)
+
+        # Later: add your font-size actions here
+        self.action_increase_font = QAction("Increase Text Size", self)
+        self.action_increase_font.triggered.connect(self._handle_increase_text_size)
+
+        self.action_decrease_font = QAction("Decrease Text Size", self)
+        self.action_decrease_font.triggered.connect(self._handle_decrease_text_size)
+
+        self.action_reset_font = QAction("Reset Text Size", self)
+        self.action_reset_font.triggered.connect(self._handle_reset_text_size)
 
     def _create_menu_bar(self):
-
         menu_bar = self.menuBar()
         self.setMenuBar(menu_bar)
 
+        # File
         file_menu = menu_bar.addMenu("File")
-        
-        new_project = file_menu.addAction("Create New Project")
-        new_project.triggered.connect(self._handle_create_new_project_requested)
+        file_menu.addAction(self.action_new_project)
+        file_menu.addAction(self.action_open_project)
 
-        open_project = file_menu.addAction("Open Project")
-        open_project.triggered.connect(self._handle_open_project_requested)
-
-        help_menu = menu_bar.addMenu("Help")
-        thing = help_menu.addAction("Some Help")
-        
+        # View
         view_menu = menu_bar.addMenu("View")
-        switch_to_analysis = view_menu.addAction("Open Analysis View")
-        switch_to_analysis.triggered.connect(self._handle_open_analysis_requested)
+        view_menu.addAction(self.action_open_analysis)
+        view_menu.addAction(self.action_open_project_view)
 
-        switch_to_project = view_menu.addAction("Open Project View")
-        switch_to_project.triggered.connect(self._handle_project_view_requested)
+        # Optionally group font controls under View
+        view_menu.addSeparator()
+        view_menu.addAction(self.action_increase_font)
+        view_menu.addAction(self.action_decrease_font)
+        view_menu.addAction(self.action_reset_font)
 
+        # Reports
         report_menu = menu_bar.addMenu("Reports")
-        generate_code_report = report_menu.addAction("Generate Code Report")
-        generate_code_report.triggered.connect(self._handle_generate_report_requested)
+        report_menu.addAction(self.action_generate_report)
 
-        about_mise = view_menu.addAction("About Mise")
-        about_mise.triggered.connect(self._handle_show_about_dialog)
+        # Help
+        help_menu = menu_bar.addMenu("Help")
+        help_menu.addAction(self.action_about)
 
     def _handle_generate_report_requested(self):
         """
