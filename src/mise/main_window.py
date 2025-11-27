@@ -160,6 +160,6 @@ class MainWindow(QMainWindow):
             "About Mise",
             "<b>Mise</b><br>"
             "An open-source qualitative data analysis tool.<br><br>"
-            "Version 0.0.1<br>"
+            "Version 0.1.1<br>"
             "<a href='https://miseqda.com'>miseqda.com</a>"
         )

@@ -8,7 +8,7 @@ version = "0.1.1"
 description = "Mise: pen-source QDA tool (0.1.1)"
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "MIT" } # or whatever you choose
+license = { text = "GPLv3" }
 authors = [
   { name = "Timothy Elder" }
 ]
