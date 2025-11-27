@@ -103,6 +103,7 @@ class AppController:
     # ---------- view management ----------
 
     def _create_project_view_if_needed(self):
+        self.main_window._apply_content_font_size()
         if self.current_repo is None:
             return
         if self._project_view is None:
