@@ -23,7 +23,7 @@ def run():
 
     app.setDesktopFileName("Mise")
     app.setApplicationName("Mise")
-    app.setApplicationVersion("0.1.1")
+    app.setApplicationVersion("0.1.2")
     app.setOrganizationDomain("https://miseqda.com")
 
     window = MainWindow()

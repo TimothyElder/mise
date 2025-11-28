@@ -111,6 +111,10 @@ class AnalysisView(QWidget):
 
         self.code_segment_view.segmentActivated.connect(self._on_segment_activated)
 
+    # UI Methods ----------------------------------------
+    def set_content_font_size(self, size_pt: int):
+        self.document_view.set_content_font_size(size_pt)
+
     def show_document_page(self):
         self.stacked.setCurrentIndex(self.PAGE_DOCUMENT)
 
@@ -131,19 +135,12 @@ class AnalysisView(QWidget):
         self.code_segment_view.load_segments_for_code(code_id)
     
     def _on_segment_activated(self, doc_id: int, start: int, end: int):
-        # Switch to document page
         self.show_document_page()
         path = self.repo.get_document_path(doc_id)
 
         self.document_view.display_file_content(path)
         self.document_view.current_document_id = doc_id
-
-        # Highlight all segments
         self.document_view.refresh_highlights()
 
-        # Focus this specific segment
-        cursor = self.document_view.document_viewer.textCursor()
-        cursor.setPosition(start)
-        cursor.setPosition(end, QTextCursor.KeepAnchor)
-        self.document_view.document_viewer.setTextCursor(cursor)
-        self.document_view.document_viewer.ensureCursorVisible()
+        # Delegate focusing to the viewer widget itself
+        self.document_view.focus_segment(start, end)

@@ -3,15 +3,19 @@ import logging
 log = logging.getLogger(__name__)
 
 from PySide6.QtWidgets import (
-    QMainWindow, QFileDialog, QInputDialog, QMessageBox, QDialog
+    QMainWindow, QFileDialog, QInputDialog, QMessageBox, QDialog, QVBoxLayout,
+    QTableWidget, QTableWidgetItem, QPushButton, QHeaderView, QApplication
 )
 from PySide6.QtCore import QDir
 
-from PySide6.QtGui import QAction
+from PySide6.QtGui import QAction, QKeySequence, QFont
 
 from .widgets.welcome_widget import WelcomeWidget
 from .widgets.report_dialog import CodeReportDialog
 from .app_controller import AppController
+from .ui import theme
+
+from PySide6.QtGui import QFontDatabase
 
 
 class MainWindow(QMainWindow):
@@ -19,6 +23,8 @@ class MainWindow(QMainWindow):
         super().__init__()
         
         self.controller = AppController(self)
+        self.controller.load_app_fonts()
+        self._set_global_fonts()
 
         self._create_actions()
         self._create_menu_bar()
@@ -31,6 +37,15 @@ class MainWindow(QMainWindow):
         welcome.new_project_requested.connect(self._handle_create_new_project_requested)
         welcome.open_project_requested.connect(self._handle_open_project_requested)
         self.setCentralWidget(welcome)
+
+    def _set_global_fonts(self):
+
+        # Example: Inter as your app UI font
+        ui_font = QFont(theme.FONT_SANS_FAMILY, pointSize=theme.CONTENT_FONT_SIZE_PT_DEFAULT)
+        self.setFont(ui_font)
+
+        # And if you want Qt’s default palette to assume this family:
+        QApplication.setFont(ui_font)
 
     def _handle_create_new_project_requested(self):
         """
@@ -62,35 +77,46 @@ class MainWindow(QMainWindow):
     def _create_actions(self):
         # File
         self.action_new_project = QAction("Create New Project", self)
+        self.action_new_project.setShortcut(QKeySequence.New)
         self.action_new_project.triggered.connect(self._handle_create_new_project_requested)
 
         self.action_open_project = QAction("Open Project", self)
+        self.action_open_project.setShortcut(QKeySequence.Open)
         self.action_open_project.triggered.connect(self._handle_open_project_requested)
 
         # View
         self.action_open_analysis = QAction("Open Analysis View", self)
+        self.action_open_analysis.setShortcut("Ctrl+Shift+A")
         self.action_open_analysis.triggered.connect(self._handle_open_analysis_requested)
 
         self.action_open_project_view = QAction("Open Project View", self)
+        self.action_open_project_view.setShortcut("Ctrl+Shift+P")
         self.action_open_project_view.triggered.connect(self._handle_project_view_requested)
 
         # Reports
         self.action_generate_report = QAction("Generate Code Report", self)
+        self.action_generate_report.setShortcut("Ctrl+R")
         self.action_generate_report.triggered.connect(self._handle_generate_report_requested)
 
         # Help
         self.action_about = QAction("About Mise", self)
         self.action_about.triggered.connect(self._handle_show_about_dialog)
 
-        # Later: add your font-size actions here
+        self.action_show_shortcuts = QAction("Keyboard Shortcuts", self)
+        self.action_show_shortcuts.triggered.connect(self._handle_show_shortcuts_dialog)
+
+        # Font size
         self.action_increase_font = QAction("Increase Text Size", self)
-        self.action_increase_font.triggered.connect(self._handle_increase_text_size)
+        self.action_increase_font.setShortcut(QKeySequence.ZoomIn)
+        self.action_increase_font.triggered.connect(self.controller.increase_text_size)
 
         self.action_decrease_font = QAction("Decrease Text Size", self)
-        self.action_decrease_font.triggered.connect(self._handle_decrease_text_size)
+        self.action_decrease_font.setShortcut(QKeySequence.ZoomOut)
+        self.action_decrease_font.triggered.connect(self.controller.decrease_text_size)
 
         self.action_reset_font = QAction("Reset Text Size", self)
-        self.action_reset_font.triggered.connect(self._handle_reset_text_size)
+        self.action_reset_font.setShortcut("Ctrl+0")
+        self.action_reset_font.triggered.connect(self.controller.reset_text_size)
 
     def _create_menu_bar(self):
         menu_bar = self.menuBar()
@@ -105,8 +131,6 @@ class MainWindow(QMainWindow):
         view_menu = menu_bar.addMenu("View")
         view_menu.addAction(self.action_open_analysis)
         view_menu.addAction(self.action_open_project_view)
-
-        # Optionally group font controls under View
         view_menu.addSeparator()
         view_menu.addAction(self.action_increase_font)
         view_menu.addAction(self.action_decrease_font)
@@ -118,6 +142,7 @@ class MainWindow(QMainWindow):
 
         # Help
         help_menu = menu_bar.addMenu("Help")
+        help_menu.addAction(self.action_show_shortcuts)
         help_menu.addAction(self.action_about)
 
     def _handle_generate_report_requested(self):
@@ -194,6 +219,50 @@ class MainWindow(QMainWindow):
             "About Mise",
             "<b>Mise</b><br>"
             "An open-source qualitative data analysis tool.<br><br>"
-            "Version 0.1.1<br>"
+            "Version 0.1.2<br>"
             "<a href='https://miseqda.com'>miseqda.com</a>"
         )
+
+    def _handle_show_shortcuts_dialog(self):
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Keyboard Shortcuts")
+
+        layout = QVBoxLayout(dialog)
+
+        table = QTableWidget(dialog)
+        table.setColumnCount(2)
+        table.setHorizontalHeaderLabels(["Action", "Shortcut"])
+        table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
+        table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        table.verticalHeader().setVisible(False)
+        table.setEditTriggers(QTableWidget.NoEditTriggers)
+        table.setSelectionMode(QTableWidget.NoSelection)
+
+        # Collect the actions you actually want to show
+        rows = [
+            ("Create New Project", self.action_new_project),
+            ("Open Project", self.action_open_project),
+            ("Open Analysis View", self.action_open_analysis),
+            ("Open Project View", self.action_open_project_view),
+            ("Generate Code Report", self.action_generate_report),
+            ("Increase Text Size", self.action_increase_font),
+            ("Decrease Text Size", self.action_decrease_font),
+            ("Reset Text Size", self.action_reset_font),
+        ]
+
+        table.setRowCount(len(rows))
+
+        for row_idx, (label, action) in enumerate(rows):
+            shortcut = action.shortcut().toString(QKeySequence.NativeText)
+            table.setItem(row_idx, 0, QTableWidgetItem(label))
+            table.setItem(row_idx, 1, QTableWidgetItem(shortcut))
+
+        layout.addWidget(table)
+
+        close_btn = QPushButton("Close", dialog)
+        close_btn.clicked.connect(dialog.accept)
+        layout.addWidget(close_btn)
+
+        dialog.setLayout(layout)
+        dialog.resize(500, 300)
+        dialog.exec()

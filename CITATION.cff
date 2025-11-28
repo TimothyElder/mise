@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "Please cite this software when using Mise in academic or scientific work."
 title: "Mise: Open-source qualitative data analysis software"
-version: 0.1.1
+version: 0.1.2
 doi: 10.xxxx/placeholder
 date-released: 2025-11-25   # update to actual release date on tag
 
@@ -21,7 +21,7 @@ preferred-citation:
   authors:
     - family-names: Elder
       given-names: Timothy B.
-  version: 0.1.1
+  version: 0.1.2
   doi: 10.xxxx/placeholder
   url: "https://github.com/TimothyElder/mise"
 

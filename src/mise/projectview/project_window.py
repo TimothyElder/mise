@@ -67,6 +67,11 @@ class ProjectView(QWidget):
         self.code_browser_widget.codes_updated.connect(self.file_viewer_widget.refresh_highlights)
         # self.code_browser_widget.code_deleted.connect(self.on_code_deleted)
 
+    # UI Methods ----------------------------------------
+    def set_content_font_size(self, size_pt: int):
+        self.file_viewer_widget.set_content_font_size(size_pt)
+
+    # Actions ----------------------------------------
     def on_document_deleted(self, doc_id: int, text_path: str):
         if self.file_viewer_widget.current_document_id == doc_id:
             self.file_viewer_widget.clear_document()

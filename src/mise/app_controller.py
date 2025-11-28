@@ -6,12 +6,16 @@ from html import escape
 import webbrowser
 from pathlib import Path
 
-from PySide6.QtWidgets import QMainWindow, QMessageBox
+from PySide6.QtWidgets import QMainWindow, QMessageBox, QApplication
+from PySide6.QtCore import QSettings
+
+from PySide6.QtGui import QFontDatabase
 
 from .utils.project_repository import ProjectRepository
 from .projectview.project_window import ProjectView
 from .analysisview.analysis_window import AnalysisView
 from .project_init import init_project
+from .ui import theme
 
 class AppController:
     """
@@ -20,6 +24,12 @@ class AppController:
     """
     def __init__(self, main_window: QMainWindow):
         self.main_window = main_window
+
+    # ---------- Settings + UI state ----------
+        self.settings = QSettings("ElderLab", "Mise")
+        self.content_font_size = int(
+            self.settings.value("content_font_size", theme.CONTENT_FONT_SIZE_PT_DEFAULT)
+        )
     
     # ---------- state changes ----------
         self.current_project_name: Optional[str] = None
@@ -28,6 +38,13 @@ class AppController:
 
         self._project_view: Optional[ProjectView] = None
         self._analysis_view: Optional[AnalysisView] = None
+
+    # ----------- Font Setup ----------------
+    def load_app_fonts(self):
+        font_dir = Path(__file__).resolve().parent / "assets" / "fonts"
+
+        for font_file in font_dir.glob("*.ttf"):
+            QFontDatabase.addApplicationFont(str(font_file))
 
     # ---------- project lifecycle ----------
 
@@ -103,7 +120,6 @@ class AppController:
     # ---------- view management ----------
 
     def _create_project_view_if_needed(self):
-        self.main_window._apply_content_font_size()
         if self.current_repo is None:
             return
         if self._project_view is None:
@@ -138,8 +154,9 @@ class AppController:
             self.current_project_root,
             self.current_repo,
         )
-        self._project_view = view
+        self._project_view = view # updates controller state
         self.main_window.setCentralWidget(view)
+        self._project_view.set_content_font_size(self.content_font_size)
 
     def show_analysis_view(self):
         if self.current_repo is None:
@@ -153,6 +170,41 @@ class AppController:
         )
         self._analysis_view = view
         self.main_window.setCentralWidget(view)
+        self._analysis_view.set_content_font_size(self.content_font_size)
+        
+
+    # ---------- UI Methods ------------------------------
+
+    def increase_text_size(self):
+        new_size = min(
+            self.content_font_size + 1,
+            theme.CONTENT_FONT_SIZE_PT_MAX,
+        )
+        if new_size != self.content_font_size:
+            self.content_font_size = new_size
+            self._apply_content_font_size()
+
+    def decrease_text_size(self):
+        new_size = max(
+            self.content_font_size - 1,
+            theme.CONTENT_FONT_SIZE_PT_MIN,
+        )
+        if new_size != self.content_font_size:
+            self.content_font_size = new_size
+            self._apply_content_font_size()
+
+    def reset_text_size(self):
+        if self.content_font_size != theme.CONTENT_FONT_SIZE_PT_DEFAULT:
+            self.content_font_size = theme.CONTENT_FONT_SIZE_PT_DEFAULT
+            self._apply_content_font_size()
+
+    def _apply_content_font_size(self):
+        self.settings.setValue("content_font_size", self.content_font_size)
+
+        current = self.main_window.centralWidget()
+        # Only update the visible view; ignore things that don't support font size
+        if hasattr(current, "set_content_font_size"):
+            current.set_content_font_size(self.content_font_size)
     
     # ---------- reports ------------------------------
 

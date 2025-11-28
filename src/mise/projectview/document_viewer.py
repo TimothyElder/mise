@@ -9,12 +9,13 @@ from PySide6.QtWidgets import (
 
 from PySide6.QtGui import (
     QTextCursor, QTextCharFormat, 
-    QColor)
+    QColor, QFont)
 
 from PySide6.QtCore import Qt
 
 from ..utils.project_repository import ProjectRepository
 from .code_picker import CodePickerDialog
+from ..ui import theme
 
 class DocumentViewerWidget(QWidget):
 
@@ -31,6 +32,7 @@ class DocumentViewerWidget(QWidget):
         layout = QVBoxLayout(self)
 
         self.document_viewer = QTextBrowser()
+        self.document_viewer.setFont(theme.serif_font)
         self.document_viewer.setText("Select a document to view its content.")
         layout.addWidget(self.document_viewer)
 
@@ -39,6 +41,12 @@ class DocumentViewerWidget(QWidget):
         self.document_viewer.customContextMenuRequested.connect(
             self.open_text_context_menu
         )
+
+    # UI Methods ------------------------------------------------------------
+    def set_content_font_size(self, size_pt: int):
+        font = self.document_viewer.font()
+        font.setPointSize(size_pt)
+        self.document_viewer.setFont(font)
 
     def display_file_content(self, path: Path):
         """

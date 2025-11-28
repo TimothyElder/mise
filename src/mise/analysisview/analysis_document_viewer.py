@@ -14,6 +14,7 @@ from PySide6.QtGui import (
 from PySide6.QtCore import Qt
 
 from ..utils.project_repository import ProjectRepository
+from ..ui import theme
 
 class AnalysisDocumentViewerWidget(QWidget):
 
@@ -30,6 +31,7 @@ class AnalysisDocumentViewerWidget(QWidget):
         layout = QVBoxLayout(self)
 
         self.document_viewer = QTextBrowser()
+        self.document_viewer.setFont(theme.serif_font)
         self.document_viewer.setText("Select a document to view its content.")
         layout.addWidget(self.document_viewer)
 
@@ -38,6 +40,12 @@ class AnalysisDocumentViewerWidget(QWidget):
         self.document_viewer.customContextMenuRequested.connect(
             self.open_text_context_menu
         )
+
+    # UI Methods ------------------------------------------------------------
+    def set_content_font_size(self, size_pt: int):
+        font = self.document_viewer.font()
+        font.setPointSize(size_pt)
+        self.document_viewer.setFont(font)
 
     def display_file_content(self, path: Path):
         """
@@ -61,22 +69,6 @@ class AnalysisDocumentViewerWidget(QWidget):
         segment = self.repo.get_segment_at_position(self.current_document_id, char_pos)
 
         menu = self.document_viewer.createStandardContextMenu()
-
-        # if segment is not None:
-        #     segment_id = segment["id"]
-        #     menu.addSeparator()
-        #     delete = menu.addAction("Delete Highlight")
-        #     delete.triggered.connect(
-        #         lambda _checked=False, seg_id=segment_id: self.delete_segment_and_refresh(seg_id)
-        #     )
-
-        # cursor = self.document_viewer.textCursor()
-        # if cursor.hasSelection():
-        #     menu.addSeparator()
-        #     assign = menu.addAction("Assign Code…")
-        #     assign.triggered.connect(self.assign_code_to_selection)
-
-        # menu.exec(self.document_viewer.mapToGlobal(pos))
     
     def clear_document(self):
         """
@@ -115,3 +107,13 @@ class AnalysisDocumentViewerWidget(QWidget):
             cursor.setPosition(seg["start_offset"])
             cursor.setPosition(seg["end_offset"], QTextCursor.KeepAnchor)
             cursor.setCharFormat(fmt)
+
+    def focus_segment(self, start: int, end: int):
+        """
+        Move the text cursor to [start, end) and ensure it is visible.
+        """
+        cursor = self.document_viewer.textCursor()
+        cursor.setPosition(start)
+        cursor.setPosition(end, QTextCursor.KeepAnchor)
+        self.document_viewer.setTextCursor(cursor)
+        self.document_viewer.ensureCursorVisible()

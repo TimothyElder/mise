@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mise-qda"
-version = "0.1.1"
-description = "Mise: pen-source QDA tool (0.1.1)"
+version = "0.1.2"
+description = "Mise: pen-source QDA tool (0.1.2)"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "GPLv3" }
