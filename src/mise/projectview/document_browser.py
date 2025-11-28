@@ -39,11 +39,6 @@ class DocumentBrowserWidget(QWidget):
 
         layout = QVBoxLayout(self)
 
-        # self.back_button = QPushButton("Back")
-        # self.back_button.clicked.connect(self.go_back)
-        # self.back_button.setEnabled(False)  # Initially disabled at root directory
-        # layout.addWidget(self.back_button)
-
         self.file_list = QListWidget()
         self.populate_file_list(self.current_path)
         layout.addWidget(self.file_list)

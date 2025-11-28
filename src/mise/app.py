@@ -3,6 +3,7 @@ import logging
 from pathlib import Path
 
 from PySide6.QtWidgets import QApplication
+from PySide6.QtCore import QCoreApplication
 from PySide6.QtGui import QIcon
 
 from .main_window import MainWindow
@@ -25,6 +26,9 @@ def run():
     app.setApplicationName("Mise")
     app.setApplicationVersion("0.1.2")
     app.setOrganizationDomain("https://miseqda.com")
+
+    app.setOrganizationName("MimirResearch")
+    app.setOrganizationDomain("mimirresearch.us")
 
     window = MainWindow()
     window.show()

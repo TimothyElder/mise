@@ -26,7 +26,7 @@ class AppController:
         self.main_window = main_window
 
     # ---------- Settings + UI state ----------
-        self.settings = QSettings("ElderLab", "Mise")
+        self.settings = QSettings("MimirResearch", "Mise")
         self.content_font_size = int(
             self.settings.value("content_font_size", theme.CONTENT_FONT_SIZE_PT_DEFAULT)
         )
