@@ -28,7 +28,7 @@ def run():
     app.setOrganizationDomain("https://miseqda.com")
 
     app.setOrganizationName("MimirResearch")
-    app.setOrganizationDomain("mimirresearch.us")
+    app.setOrganizationDomain("mimirresearch.org")
 
     window = MainWindow()
     window.show()
