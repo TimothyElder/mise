@@ -13,3 +13,6 @@
 - Increase text size in document viewers now supported.
 - Keyboard shortcuts and help dialog describing them added.
 - Windows and macOS now supported.
+
+
+git tag -a v0.1.2 -m "Release v0.1.2"

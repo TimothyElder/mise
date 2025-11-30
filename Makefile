@@ -69,6 +69,7 @@ dmg: build-macos
 	  -srcfolder build/dmg \
 	  -ov \
 	  -format UDZO \
+	  -size 1024m \
 	  dist/$(DMG_NAME)
 
 clean:
