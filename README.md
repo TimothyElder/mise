@@ -1,6 +1,6 @@
 # Mise <img src='src/mise/assets/mise.png' align="right" height="138.5" /></a>
 
-![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg) ![GitHub release](https://img.shields.io/github/v/release/TimothyElder/mise) [![macOS](https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=F0F0F0)](#) [![Windows](https://custom-icon-badges.demolab.com/badge/Windows-0078D6?logo=windows11&logoColor=white)](#)
+![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg) ![GitHub release](https://img.shields.io/github/v/release/TimothyElder/mise) [![macOS](https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=F0F0F0)](#) [![Windows](https://custom-icon-badges.demolab.com/badge/Windows-0078D6?logo=windows11&logoColor=white)](#) [![Linux](https://img.shields.io/badge/Linux-FCC624?logo=linux&logoColor=black)](#)
 
 >For the professional, one's meez is an obsession, one's sword and shield, the only thing standing between you and chaos. If you have your meez right, it means you have your head together, you are "set up", stocked, organized, ready with everything you need and are likely to need for the tasks at hand.
 <p align="right"/>Anthony Bourdain, <em>Le Halles Cookbook</em></p>
