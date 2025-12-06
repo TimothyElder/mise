@@ -11,7 +11,7 @@
 
 **Status:** Early-stage, expect breaking changes.
 
-**Supported OS:** macOS
+**Supported OS:** macOS, Windows
 
 [Changelog](CHANGELOG.md)
 
@@ -69,13 +69,11 @@ make build-macos
 ## Road Map
 
 ### In progress
-- Support for Windows and Linux
-- PDF imports to project
-- UI styling and size changes for legibility
-
-### Planned
+- Support for Linux
 - Advanced reporting engine (PDF/DOCX)
 - Memoing system with split document viewer
+
+### Planned
 - Project versioning
 - Alembic database versioning
 - NLP in Analysis View + Code tree visualization

@@ -53,8 +53,13 @@ build-macos: install
 build-windows: install
 	$(VENV_PYTHON) -m PyInstaller mise.spec
 
-test: install
+test:
 	$(PY) -m pytest
+
+# Need to actually create this 
+release: clean build-mac build-windows
+	pytest -q
+# 	git tag v.0.1.3 -m "v0.1.3 release"
 
 docs:
 	PYTHONPATH=src $(PYTHON) -m pydoc -w $(PYDOC_MODULES)
