@@ -13,8 +13,10 @@ assets_src = src_dir / "mise" / "assets"
 
 if sys.platform == "win32":
     icon_file = assets_src / "mise.ico"
-else:
-    icon_file = assets_src /  "mise.icns"
+elif sys.platform == "darwin":
+    icon_file = assets_src / "mise.icns"
+else:  # Linux
+    icon_file = assets_src / "mise-icon.png"
 
 block_cipher = None
 

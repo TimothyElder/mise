@@ -45,9 +45,17 @@
 2. Download the file named `Mise-0.1.2-setup.exe`.
 3. Run the installer and follow the prompts.
 
+### Linux (Ubuntu/Debian)
+
+Mise requires the following Linux libraries:
+
+```sh
+sudo apt install libxcb-xinerama0 libxcb-cursor0
+```
+
 ### Install from source
 
-On macOS you can install from source:
+On macOS and Linux you can install from source:
 
 ```sh
 git clone https://github.com/TimothyElder/mise.git
