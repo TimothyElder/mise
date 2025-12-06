@@ -1,5 +1,5 @@
 import logging
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 from pathlib import Path
 
 from PySide6.QtWidgets import (
@@ -65,7 +65,7 @@ class DocumentBrowserWidget(QWidget):
             return  # Prevent None errors
 
         path = Path(path)
-        log.info("Item clicked in DocumentBrowserWidget: %r", path)
+        logger.info("Item clicked in DocumentBrowserWidget: %r", path)
 
 		# IF DIRECTORY
         if path.is_dir():
@@ -76,9 +76,9 @@ class DocumentBrowserWidget(QWidget):
             doc_id = self.repo.lookup_document_id(path)
             
             if doc_id is None:
-                log.warning("File not registered in documents: %r", path)
+                logger.warning("File not registered in documents: %r", path)
             else:
-                log.info("Clicked document: doc_id=%s path=%r", doc_id, path)
+                logger.info("Clicked document: doc_id=%s path=%r", doc_id, path)
             
             self.document_activated.emit(path)
             
@@ -127,7 +127,7 @@ class DocumentBrowserWidget(QWidget):
                 self.file_list.addItem(item)
 
         except Exception as e:
-            log.error("Error accessing directory %r: %s", self.current_path,  e)
+            logger.error("Error accessing directory %r: %s", self.current_path,  e)
 
     def go_back(self):
         """
@@ -222,7 +222,7 @@ class DocumentBrowserWidget(QWidget):
 
     def delete_document_from_ui(self, item, doc_id: int):
         rows, text_path = self.repo.delete_document(doc_id)
-        log.info("Repo deleted %s document(s) for id=%s, path=%r", rows, doc_id, text_path)
+        logger.info("Repo deleted %s document(s) for id=%s, path=%r", rows, doc_id, text_path)
 
         if rows:
             # 1) Remove file from disk
@@ -230,7 +230,7 @@ class DocumentBrowserWidget(QWidget):
                 try:
                     Path(text_path).unlink(missing_ok=True)
                 except Exception as e:
-                    log.warning("Failed to delete file %r: %s", text_path, e)
+                    logger.warning("Failed to delete file %r: %s", text_path, e)
 
             # 2) Remove the item from the list
             row_index = self.file_list.row(item)
@@ -240,4 +240,4 @@ class DocumentBrowserWidget(QWidget):
             self.document_deleted.emit(doc_id, text_path or "")
 
         else:
-            log.warning("No document deleted for id=%s", doc_id)
+            logger.warning("No document deleted for id=%s", doc_id)

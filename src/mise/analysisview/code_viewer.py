@@ -1,7 +1,7 @@
 # src/mise/analysisview/code_viewer.py
 
 import logging
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 from PySide6.QtWidgets import (
     QWidget,
@@ -113,7 +113,7 @@ class CodeSegmentView(QWidget):
         self.list.clear()
 
         rows = self.repo.get_segments_for_code(code_id)
-        log.debug("CodeSegmentView: loaded %d segments for code_id=%s", len(rows), code_id)
+        logger.debug("CodeSegmentView: loaded %d segments for code_id=%s", len(rows), code_id)
 
         for seg in rows:
             doc_label = seg["display_name"]

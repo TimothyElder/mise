@@ -35,14 +35,18 @@
 ### macOS
 
 1. Go to the [Releases page](https://github.com/TimothyElder/mise/releases).
-2. Download the file named `Mise-0.1.2.dmg`.
+2. Download the file named `Mise-0.1.4.dmg`.
 3. Open the DMG and drag `Mise.app` into your Applications folder.
+
+> [!IMPORTANT]
+> The first time you open Mise you will get a warning that the app is unsigned. To use it you will have to go to System Settings > Privacy & Security > Scroll down and click "Open Anyway"
+
 4. On first run, you may need to right-click → Open due to macOS Gatekeeper.
 
 ### Windows
 
 1. Go to the [Releases page](https://github.com/TimothyElder/mise/releases).
-2. Download the file named `Mise-0.1.2-setup.exe`.
+2. Download the file named `Mise-0.1.4-setup.exe`.
 3. Run the installer and follow the prompts.
 
 ### Linux (Ubuntu/Debian)

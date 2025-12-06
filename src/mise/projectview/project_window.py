@@ -1,6 +1,6 @@
 from pathlib import Path
 import logging
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 from PySide6.QtWidgets import (
     QSplitter, QVBoxLayout, QWidget
@@ -20,7 +20,7 @@ class ProjectView(QWidget):
     def __init__(self, project_name, project_root, repo: ProjectRepository):
         super().__init__()
 
-        log.info("Opened ProjectView for %s at %r", project_name, project_root)
+        logger.info("Opened ProjectView for %s at %r", project_name, project_root)
 
         # Config
         self.project_name = project_name
@@ -75,15 +75,15 @@ class ProjectView(QWidget):
     def on_document_deleted(self, doc_id: int, text_path: str):
         if self.file_viewer_widget.current_document_id == doc_id:
             self.file_viewer_widget.clear_document()
-            log.info("Deleted active document_id=%s (path=%r)", doc_id, text_path)
+            logger.info("Deleted active document_id=%s (path=%r)", doc_id, text_path)
 
     def open_memo_view_for_document(self):
-        log.warning("Memo view not yet implemented")
+        logger.warning("Memo view not yet implemented")
 
     def on_document_renamed(self, doc_id: int, new_name: str):
         if self.file_viewer_widget.current_document_id == doc_id:
             self.setWindowTitle(f"Mise — {new_name}")
-            log.info("Renamed active document_id=%s to %r", doc_id, new_name)
+            logger.info("Renamed active document_id=%s to %r", doc_id, new_name)
         
     def on_document_activated(self, path: Path):
         # Ensure we always work with Path inside
@@ -92,9 +92,9 @@ class ProjectView(QWidget):
         # Look up document id for this path
         doc_id = self.repo.lookup_document_id(abs_path)
         if doc_id is None:
-            log.warning("No document id for path %r", abs_path)
+            logger.warning("No document id for path %r", abs_path)
         else:
-            log.info("Activated document_id=%s for %r", doc_id, abs_path)
+            logger.info("Activated document_id=%s for %r", doc_id, abs_path)
 
         # Push state into the viewer
         self.file_viewer_widget.current_document_id = doc_id

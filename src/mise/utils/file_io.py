@@ -8,7 +8,7 @@ from pathlib import Path
 import pdfplumber
 
 import logging
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 def convert_to_canonical_text(src_path: Path) -> str:
     """
@@ -38,7 +38,7 @@ def extract_text_from_pdf(path: Path) -> str:
             text = page.extract_text() or ""
             chunks.append(text)
 
-    log.info("extract_text_from_pdf: extracted content from %r", path)
+    logger.info("extract_text_from_pdf: extracted content from %r", path)
     # Normalize to Unix line endings
     return "\n\n".join(chunks).replace("\r\n", "\n").replace("\r", "\n")
 
@@ -49,7 +49,7 @@ def extract_text_from_docx(path: Path) -> str:
     doc = DocxDocument(str(path))
     paragraphs = [p.text for p in doc.paragraphs]
     text = "\n\n".join(paragraphs)
-    log.info("extract_text_from_docx: extracted content from %r", path)
+    logger.info("extract_text_from_docx: extracted content from %r", path)
     return text.replace("\r\n", "\n").replace("\r", "\n")
 
 def extract_text_from_doc(path: Path) -> str:
@@ -58,5 +58,5 @@ def extract_text_from_doc(path: Path) -> str:
 
 def extract_text_from_markdown(path: Path) -> str:
     text = path.read_text(encoding="utf-8")
-    log.info("extract_text_from_markdown: extracted content from %r", path)
+    logger.info("extract_text_from_markdown: extracted content from %r", path)
     return text.replace("\r\n", "\n").replace("\r", "\n")

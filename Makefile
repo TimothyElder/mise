@@ -12,12 +12,12 @@ else
 endif
 
 PYDOC_MODULES := $(shell $(PYTHON) -c "import sys, pkgutil; sys.path.insert(0, 'src'); import mise; print(' '.join(m.name for m in pkgutil.walk_packages(mise.__path__, 'mise.') if m.name != 'mise.__main__'))")
-DMG_NAME = Mise-0.1.2.dmg
+DMG_NAME = Mise-0.1.4.dmg
 APP_NAME := mise
 PACKAGE := mise
 
 # Linux variables
-DEB_VERSION = 0.1.2
+DEB_VERSION = 0.1.4
 DEB_ARCH = amd64
 APP_DESCRIPTION = Qualitative data analysis tool for social scientists
 

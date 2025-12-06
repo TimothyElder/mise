@@ -3,7 +3,7 @@ from .database import initialize_database
 from .metadata import initialize_metadata
 
 import logging
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 def init_project(project_name: str, dirpath: str) -> Path:
     """
@@ -31,11 +31,11 @@ def create_project_directory(project_name: str, dirpath: str) -> Path:
     project_root = dirpath / f"{project_name}.mise"
 
     if not dirpath.exists():
-        log.error("Directory doesn't exist on create project at %r", project_root)
+        logger.error("Directory doesn't exist on create project at %r", project_root)
         raise ValueError("Directory doesn't exist.")
         
     if project_root.exists():
-        log.error("Directory already exist on create project at %r", project_root)
+        logger.error("Directory already exist on create project at %r", project_root)
         raise FileExistsError("Project already exists.")
 
     project_root.mkdir()

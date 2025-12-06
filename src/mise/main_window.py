@@ -1,6 +1,6 @@
 from pathlib import Path
 import logging
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 from PySide6.QtWidgets import (
     QMainWindow, QFileDialog, QInputDialog, QMessageBox, QDialog, QVBoxLayout,
@@ -72,7 +72,7 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "Success", f"Project '{project_name}' created successfully.")
         except Exception as e:
             QMessageBox.critical(self, "Error", str(e))
-            log.error("Error creating project named %s at %r: %s", project_name, dirpath, e)
+            logger.error("Error creating project named %s at %r: %s", project_name, dirpath, e)
     
     def _create_actions(self):
         # File
@@ -219,7 +219,7 @@ class MainWindow(QMainWindow):
             "About Mise",
             "<b>Mise</b><br>"
             "An open-source qualitative data analysis tool.<br><br>"
-            "Version 0.1.2<br>"
+            "Version 0.1.4<br>"
             "<a href='https://miseqda.com'>miseqda.com</a>"
         )
 

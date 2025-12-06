@@ -1,5 +1,6 @@
 import logging
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
+
 from typing import Optional
 from datetime import datetime
 from html import escape
@@ -8,8 +9,8 @@ from pathlib import Path
 
 from PySide6.QtWidgets import QMainWindow, QMessageBox, QApplication
 from PySide6.QtCore import QSettings
-
 from PySide6.QtGui import QFontDatabase
+
 
 from .utils.project_repository import ProjectRepository
 from .projectview.project_window import ProjectView
@@ -24,6 +25,7 @@ class AppController:
     """
     def __init__(self, main_window: QMainWindow):
         self.main_window = main_window
+        logger.info("AppController initialized")
 
     # ---------- Settings + UI state ----------
         self.settings = QSettings("MimirResearch", "Mise")
@@ -65,7 +67,7 @@ class AppController:
         self._set_current_project(project_name, project_root, repo)
         self._create_project_view_if_needed()
         self.show_project_view()
-        log.info("Project %s created at %r.", project_name, project_root)
+        logger.info("Project %s created at %r.", project_name, project_root)
 
     def open_project(self, project_root: Path, texts_dir: Path):
         """
@@ -218,7 +220,7 @@ class AppController:
         """
 
         if not report_data:
-            log.warning("generate_report called with empty report_data.")
+            logger.warning("generate_report called with empty report_data.")
             return
 
         # --------------------------------------------
@@ -234,7 +236,7 @@ class AppController:
         try:
             template = template_path.read_text(encoding="utf-8")
         except FileNotFoundError:
-            log.error("AppController.generate_report: Template not found at %r", template_path)
+            logger.error("AppController.generate_report: Template not found at %r", template_path)
             return
 
         # --------------------------------------------
@@ -283,7 +285,7 @@ class AppController:
                         snippet = escape(content[start:end].strip())
                     except Exception as e:
                         snippet = "[Error reading snippet]"
-                        log.warning(f"Error reading snippet for {path}: {e}")
+                        logger.warning(f"Error reading snippet for {path}: {e}")
 
                     body_parts.append(
                         "<div class='segment'>\n"
@@ -332,9 +334,9 @@ class AppController:
             try:
                 webbrowser.open(out_path.as_uri())
             except Exception as e:
-                log.warning("Could not open report automatically: %s", e)
+                logger.warning("Could not open report automatically: %s", e)
 
-            log.info("Report successfully written to %r", out_path)
+            logger.info("Report successfully written to %r", out_path)
 
     # ---------- shutdown ------------------------------
 

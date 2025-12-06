@@ -1,5 +1,5 @@
 import logging
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 from pathlib import Path
 
 from PySide6.QtWidgets import (
@@ -88,7 +88,7 @@ class AnalysisDocumentViewerWidget(QWidget):
         cursor.setCharFormat(default_format)
 
         rows = self.repo.get_coded_segments(self.current_document_id)
-        log.debug("refresh_highlights: found %d segments", len(rows))
+        logger.debug("refresh_highlights: found %d segments", len(rows))
 
         for seg in rows:
             fmt = QTextCharFormat()

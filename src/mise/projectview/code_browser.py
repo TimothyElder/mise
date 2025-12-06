@@ -9,7 +9,7 @@ from PySide6.QtGui import QColor
 from ..utils.project_repository import ProjectRepository
 
 import logging
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 class CodeBrowserWidget(QWidget):
     codes_updated = Signal()

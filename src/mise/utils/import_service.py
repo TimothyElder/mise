@@ -2,7 +2,7 @@ from pathlib import Path
 from .file_io import convert_to_canonical_text
 
 import logging
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 ALLOWED_EXTENSIONS = {".pdf", ".docx", ".doc", ".md", ".markdown"}
 
@@ -32,5 +32,5 @@ def allocate_text_name(texts_dir: Path) -> Path:
     print(existing)
     next_id = len(existing) + 1
 
-    log.info("allocate_text_name: allocating %s", f"doc-{next_id:04d}.txt")
+    logger.info("allocate_text_name: allocating %s", f"doc-{next_id:04d}.txt")
     return texts_dir / f"doc-{next_id:04d}.txt"

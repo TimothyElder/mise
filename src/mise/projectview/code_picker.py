@@ -4,7 +4,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt
 
 import logging
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 class CodePickerDialog(QDialog):
     """

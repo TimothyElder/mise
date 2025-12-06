@@ -2,7 +2,7 @@ import errno, os
 import sys
 
 import logging
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 # Sadly, Python fails to provide the following magic number for us.
 ERROR_INVALID_NAME = 123

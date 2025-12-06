@@ -161,6 +161,10 @@ Advanced users may want to have the option to script functionality in Mise as we
 - Text paths in database are pointing to wrong location if user moves the project directory.
 **Feature Dev**
 - UI settings including font support, increase/descrease font size, dark mode, App styling
+- Project View: Enhance File Browser functionality, such as reorder files displayed adding, adding metadata columnsdfsexcce
+- Project View: Fixing width of code color column in Code Browser + standard color palette
+- Project View: Being able to add multiple codes to the same text. I don't think this violates the underlying philosophy of Mise though it might violate the description of the app the user is confronted with. I think it is necessary often to have co-occurring codes to generate insight.
+- Project View: Extend or shrink coded chunk with dragable edges to code chunk.
 - Memoing feature, when in the document tree in AnalysisView, a right click allows an option to open document in memo two panel mode.
 - Rebasing database (does this solve broken paths on project directory move)
 - Keyboard shortcuts, "Command + N" → "Create New Project", "Command + O" → "Open Project"

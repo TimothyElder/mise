@@ -1,18 +1,15 @@
 import sys
 import logging
-from pathlib import Path
 
 from PySide6.QtWidgets import QApplication
-from PySide6.QtCore import QCoreApplication
 from PySide6.QtGui import QIcon
 
 from .main_window import MainWindow
 from .utils.logging_config import setup_logging
 from .utils.paths import asset_path
 
-
 def run():
-    setup_logging(Path.home() / ".mise", level=logging.DEBUG)
+    setup_logging(level=logging.INFO) # INFO on release DEBUG during development
     app = QApplication(sys.argv)
     
     # with open("src/mise/assets/styles.qss", "r") as f:
@@ -24,7 +21,7 @@ def run():
 
     app.setDesktopFileName("Mise")
     app.setApplicationName("Mise")
-    app.setApplicationVersion("0.1.2")
+    app.setApplicationVersion("0.1.4")
     app.setOrganizationDomain("https://miseqda.com")
 
     app.setOrganizationName("MimirResearch")

@@ -5,7 +5,7 @@ from pathlib import Path
 import uuid
 
 import logging
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 class ProjectRepository:
     """
@@ -46,7 +46,7 @@ class ProjectRepository:
         :return: Description
         :rtype: int
         """
-        log.info(
+        logger.info(
             "register_document: Registering %s with text_path=%r",
             original_filename, text_path
         )
@@ -128,7 +128,7 @@ class ProjectRepository:
         )
         self.conn.commit()
 
-        log.info("[DB] Deleting document document_id=%s from database and texts_dir, %d coded_segments", document_id, cur_segments.rowcount)
+        logger.info("[DB] Deleting document document_id=%s from database and texts_dir, %d coded_segments", document_id, cur_segments.rowcount)
         return cur_docs.rowcount, self.texts_dir / text_path
 
     def rename_document_db(self, new_display_name, document_id):
@@ -147,7 +147,7 @@ class ProjectRepository:
         )
         self.conn.commit()
 
-        log.info("[DB] rename_document_db: %d rows changed by rename_document_db", cur.rowcount)
+        logger.info("[DB] rename_document_db: %d rows changed by rename_document_db", cur.rowcount)
 
         return cur.rowcount
     
@@ -166,7 +166,7 @@ class ProjectRepository:
         ).fetchone()
 
         if row is None:
-            log.error("[DB] lookup_code: NO CODE matching ID == %d", code_id)
+            logger.error("[DB] lookup_code: NO CODE matching ID == %d", code_id)
             
         return(row)
     
@@ -406,7 +406,7 @@ class ProjectRepository:
             try:
                 rel = path.relative_to(self.texts_dir)
             except ValueError:
-                log.warning(
+                logger.warning(
                     "Path %r is not under texts_dir %r; storing as-is",
                     path, self.texts_dir
                 )

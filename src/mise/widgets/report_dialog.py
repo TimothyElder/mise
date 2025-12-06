@@ -1,7 +1,7 @@
 # src/mise/analysisview/code_report_dialog.py
 
 import logging
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 from PySide6.QtWidgets import (
     QDialog,
