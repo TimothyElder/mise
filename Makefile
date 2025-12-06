@@ -18,7 +18,7 @@ PACKAGE := mise
 
 # Linux variables
 DEB_VERSION = 0.1.2
-DEB_ARCH = amd64  # or i386, arm64, etc.
+DEB_ARCH = amd64
 APP_DESCRIPTION = Qualitative data analysis tool for social scientists
 
 .PHONY: help venv install dev run build-macos build-windows build-linux build-deb test clean distclean docs
@@ -45,7 +45,6 @@ venv: $(VENV)
 
 install:
 	$(PYTHON) -m venv .venv
-	$(VENV_PIP) install --upgrade pip
 	$(VENV_PIP) install pyinstaller
 	$(VENV_PIP) install -e .
 
@@ -137,7 +136,6 @@ build-deb: build-linux
 	@echo " Public License version 3 can be found in" >> build/deb/usr/share/doc/mise/copyright
 	@echo " \"/usr/share/common-licenses/GPL-3\"." >> build/deb/usr/share/doc/mise/copyright
 	
-	# Build the .deb package
 	dpkg-deb --build build/deb dist/mise_$(DEB_VERSION)_$(DEB_ARCH).deb
 	@echo "✓ Debian package created: dist/mise_$(DEB_VERSION)_$(DEB_ARCH).deb"
 
